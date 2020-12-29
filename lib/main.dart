@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(MyApp());
@@ -95,28 +96,49 @@ class _MyHomePageState extends State<MyHomePage> {
           // center the children vertically; the main axis here is the vertical
           // axis because Columns are vertical (the cross axis would be
           // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.start,
+
           children: <Widget>[
+            Image(
+              image: AssetImage('assets/images/logo.png'),
+            ),
             ElevatedButton(
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => LiveTranslate()));
-                },
-                child: Text("Live translator")),
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => LiveTranslate()));
+              },
+              child: Text("Live translator"),
+              style: ElevatedButton.styleFrom(
+                  minimumSize: Size(250, 35),
+                  textStyle: TextStyle(
+                    fontSize: 20,
+                  )),
+            ),
             ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => PhotoTranslate()));
-                },
-                child: Text("Photo translator")),
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => PhotoTranslate()));
+              },
+              child: Text("Photo translator"),
+              style: ElevatedButton.styleFrom(
+                  minimumSize: Size(250, 35),
+                  textStyle: TextStyle(
+                    fontSize: 20,
+                  )),
+            ),
             ElevatedButton(
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Clipboard()));
-                },
-                child: Text("Clipboard"))
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Clipboard()));
+              },
+              child: Text("Clipboard"),
+              style: ElevatedButton.styleFrom(
+                  minimumSize: Size(250, 35),
+                  textStyle: TextStyle(
+                    fontSize: 20,
+                  )),
+            )
           ],
         ),
       ),
