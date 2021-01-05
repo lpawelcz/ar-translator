@@ -1,7 +1,11 @@
+import 'package:ar_translator/live_translate/live_translate.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-void main() {
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -149,19 +153,7 @@ class _MyHomePageState extends State<MyHomePage> {
 class LiveTranslate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Live Translate"),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          child: Text("zawracamy"),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-    );
+    return CameraPreviewScanner();
   }
 }
 
