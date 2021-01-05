@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "466619569370",
+    "project_id": "ar-translator-pwr",
+    "storage_bucket": "ar-translator-pwr.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:466619569370:android:78b30088eb1a5d8e5041e3",
+        "android_client_info": {
+          "package_name": "com.example.ar_translator"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "466619569370-k8pvkrqdmfu9pq1q4tldtt4bt1c27d46.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDb_-aD0EqHNyqCRh6T2E2gCS64uiqHy_E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "466619569370-k8pvkrqdmfu9pq1q4tldtt4bt1c27d46.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
