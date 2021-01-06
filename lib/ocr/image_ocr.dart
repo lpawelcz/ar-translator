@@ -6,6 +6,10 @@ import 'detector_painters.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 
+import 'package:flutter_ibm_watson/language_translator/LanguageTranslator.dart';
+import 'package:flutter_ibm_watson/utils/Language.dart';
+import 'package:flutter_ibm_watson/utils/IamOptions.dart';
+
 class ImageOcr extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _ImageOcrState();
@@ -36,6 +40,9 @@ class _ImageOcrState extends State<ImageOcr> {
     FirebaseVisionImage FBImage = FirebaseVisionImage.fromFile(File(selectedImage.path));
     TextRecognizer recognizeText = FirebaseVision.instance.textRecognizer();
     VisionText readText = await recognizeText.processImage(FBImage);
+    print("Read text: $readText");
+    var dupa = readText.text;
+    print("read dupa text: $dupa");
 
     var decodedImage = await decodeImageFromList(File(selectedImage.path).readAsBytesSync());
     Size imageSize = Size(decodedImage.width.toDouble(), decodedImage.height.toDouble());
@@ -45,6 +52,21 @@ class _ImageOcrState extends State<ImageOcr> {
       readTextResult = readText;
       selectedImageSize = imageSize;
     });
+
+    var newText = readText.text.replaceAll("\n", " ");
+    print(newText);
+
+    IamOptions options = await IamOptions(iamApiKey: "vkXBrIrcqFyoG5W98eAKpjrlhCtrSzbmAm-blnF8Sgyh", url: "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/").build();
+    LanguageTranslator service = new LanguageTranslator(iamOptions: options);
+    TranslationResult translationResults = await service.translate(newText, Language.ENGLISH, Language.POLISH);
+    print("translation result:");
+    print(translationResults.characterCount);
+    print(translationResults.wordCount);
+    print(translationResults.translations);
+
+    IdentifyLanguageResult identifyLanguageResult = await service.identifylanguage(newText);
+    print("identification result: $identifyLanguageResult");
+
 
     for (TextBlock block in readText.blocks) {
       for (TextLine line in block.lines) {
