@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
+import 'package:vector_math/vector_math_64.dart' as vector;
 
 void main() {
   runApp(MyApp());
@@ -146,20 +149,63 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class LiveTranslate extends StatelessWidget {
+class LiveTranslate extends StatefulWidget {
+  LiveTranslate({Key key, this.title}) : super(key: key);
+  final String title;
+
+  @override
+  _LiveTranslate createState() => _LiveTranslate();
+}
+
+class _LiveTranslate extends State<LiveTranslate> {
+  ArCoreController arCoreController;
+
+  _onArCoreViewCreated(ArCoreController _arcoreController) {
+    arCoreController = _arcoreController;
+    _addSphere(arCoreController);
+    _addTextPlain(arCoreController);
+  }
+
+  _addSphere(ArCoreController _arCoreController) {
+    final material = ArCoreMaterial(color: Colors.deepOrange);
+    final sphere = ArCoreSphere(materials: [material], radius: 0.2);
+    final node = ArCoreNode(
+      shape: sphere,
+      position: vector.Vector3(0, 0, -1),
+    );
+
+    _arCoreController.addArCoreNode(node);
+  }
+
+  _addTextPlain(ArCoreController _arCoreController) {
+    final material = ArCoreMaterial(color: Colors.white);
+    final textPlain = ArCoreCube(
+        materials: [material], size: vector.Vector3(0.1, 0.1, 0.001));
+    final node = ArCoreNode(
+      shape: textPlain,
+      position: vector.Vector3(0, 0, 1),
+      name: "dupa",
+      // children: Text("dupas"),
+    );
+
+    _arCoreController.addArCoreNode(node);
+    // ViewRender
+  }
+
+  @override
+  void dispose() {
+    arCoreController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Live Translate"),
       ),
-      body: Center(
-        child: ElevatedButton(
-          child: Text("zawracamy"),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+      body: ArCoreView(
+        onArCoreViewCreated: _onArCoreViewCreated,
       ),
     );
   }
