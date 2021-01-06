@@ -21,30 +21,41 @@ class TextDetectorPainter extends CustomPainter {
 
     Rect scaleRect(TextContainer container) {
       return Rect.fromLTRB(
-        container.boundingBox.left * scaleX,
-        container.boundingBox.top * scaleY,
-        container.boundingBox.right * scaleX,
-        container.boundingBox.bottom * scaleY,
+        container.boundingBox.left * scaleX - 10,
+        container.boundingBox.top * scaleY - 10,
+        container.boundingBox.right * scaleX + 10,
+        container.boundingBox.bottom * scaleY + 10,
       );
     }
 
     final Paint paint = Paint()
-      ..style = PaintingStyle.stroke
+      ..style = PaintingStyle.fill
       ..strokeWidth = 2.0;
 
     for (TextBlock block in visionText.blocks) {
-      for (TextLine line in block.lines) {
-        for (TextElement element in line.elements) {
-          paint.color = Colors.green;
-          canvas.drawRect(scaleRect(element), paint);
-        }
-
-        paint.color = Colors.yellow;
-        canvas.drawRect(scaleRect(line), paint);
-      }
-
-      paint.color = Colors.red;
+      paint.color = Colors.white;
       canvas.drawRect(scaleRect(block), paint);
+
+      final textStyle = TextStyle(
+        color: Colors.black,
+        fontSize: 15,
+      );
+
+      final textSpan = TextSpan(
+        text: block.text,
+        style: textStyle,
+      );
+      final textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout(
+        minWidth: 0,
+        maxWidth: block.boundingBox.width,
+      );
+      final offset = Offset(block.boundingBox.left * scaleX , block.boundingBox.top * scaleY);
+      textPainter.paint(canvas, offset);
+
     }
   }
 
