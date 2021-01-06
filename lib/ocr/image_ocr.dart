@@ -53,17 +53,31 @@ class _ImageOcrState extends State<ImageOcr> {
     IamOptions options = await IamOptions(iamApiKey: "vkXBrIrcqFyoG5W98eAKpjrlhCtrSzbmAm-blnF8Sgyh", url: "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/").build();
     LanguageTranslator service = new LanguageTranslator(iamOptions: options);
 
+    var destText = [];
+    var srcRawText = [];
+    var srcProcessedText = [];
+    var srcLang = [];
+
     for (TextBlock block in readText.blocks) {
-      String block_text = block.text;
-      print("Raw blockText: $block_text");
-      String blockText = block.text.replaceAll("\n", " ");
-      blockText = blockText.replaceAll('"', "\\\"");
-      print("no-newline blockText: $blockText");
-      IdentifyLanguageResult identifyLanguageResult = await service.identifylanguage(blockText);
-      print("identification result: $identifyLanguageResult");
-      TranslationResult translationResults = await service.translate(blockText, identifyLanguageResult.toString(), Language.POLISH);
-      print("translation result:");
-      print(translationResults);
+      String rawBlockText = block.text;
+      String processedBlockText = block.text.replaceAll("\n", " ");
+      processedBlockText = processedBlockText.replaceAll('"', "\\\"");
+      IdentifyLanguageResult identifyLanguageResult = await service.identifylanguage(processedBlockText);
+      TranslationResult translationResults = await service.translate(processedBlockText, identifyLanguageResult.toString(), Language.POLISH);
+      destText.add(translationResults.toString());
+      srcRawText.add(rawBlockText);
+      srcProcessedText.add(processedBlockText);
+      srcLang.add(identifyLanguageResult);
+    }
+
+    print("All together now:");
+    int i = 0;
+    for (String translation in destText) {
+      print("Raw source blockText: ${srcRawText[i]}");
+      print("Processed source blockText: ${srcProcessedText[i]}");
+      print("Source language: ${srcLang[i]}");
+      print("Destination blockText: ${destText[i]}");
+      i++;
     }
 
     for (TextBlock block in readText.blocks) {
