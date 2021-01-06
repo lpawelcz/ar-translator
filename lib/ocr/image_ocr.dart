@@ -53,20 +53,22 @@ class _ImageOcrState extends State<ImageOcr> {
       selectedImageSize = imageSize;
     });
 
-    var newText = readText.text.replaceAll("\n", " ");
-    print(newText);
-
     IamOptions options = await IamOptions(iamApiKey: "vkXBrIrcqFyoG5W98eAKpjrlhCtrSzbmAm-blnF8Sgyh", url: "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/").build();
     LanguageTranslator service = new LanguageTranslator(iamOptions: options);
-    TranslationResult translationResults = await service.translate(newText, Language.ENGLISH, Language.POLISH);
-    print("translation result:");
-    print(translationResults.characterCount);
-    print(translationResults.wordCount);
-    print(translationResults.translations);
 
-    IdentifyLanguageResult identifyLanguageResult = await service.identifylanguage(newText);
-    print("identification result: $identifyLanguageResult");
+    for (TextBlock block in readText.blocks) {
+      String blockText = block.text.replaceAll("\n", " ");
+      print("block: $blockText");
+      TranslationResult translationResults = await service.translate(blockText, Language.ENGLISH, Language.POLISH);
+      print("translation result:");
+      print(translationResults.characterCount);
+      print(translationResults.wordCount);
+      print(translationResults.translations);
+      print(translationResults);
 
+      IdentifyLanguageResult identifyLanguageResult = await service.identifylanguage(blockText);
+      print("identification result: $identifyLanguageResult");
+    }
 
     for (TextBlock block in readText.blocks) {
       for (TextLine line in block.lines) {
