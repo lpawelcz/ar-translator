@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 
-
 // Paints rectangles around all the text in the image.
 class TextDetectorPainter extends CustomPainter {
   TextDetectorPainter(this.absoluteImageSize, this.visionText);
@@ -21,30 +20,67 @@ class TextDetectorPainter extends CustomPainter {
 
     Rect scaleRect(TextContainer container) {
       return Rect.fromLTRB(
-        container.boundingBox.left * scaleX,
-        container.boundingBox.top * scaleY,
-        container.boundingBox.right * scaleX,
-        container.boundingBox.bottom * scaleY,
+        container.boundingBox.left * scaleX - 10,
+        container.boundingBox.top * scaleY - 10,
+        container.boundingBox.right * scaleX + 10,
+        container.boundingBox.bottom * scaleY + 10,
       );
     }
 
     final Paint paint = Paint()
-      ..style = PaintingStyle.stroke
+      ..style = PaintingStyle.fill
       ..strokeWidth = 2.0;
 
     for (TextBlock block in visionText.blocks) {
       for (TextLine line in block.lines) {
-        for (TextElement element in line.elements) {
-          paint.color = Colors.green;
-          canvas.drawRect(scaleRect(element), paint);
-        }
-
-        paint.color = Colors.yellow;
+        paint.color = Colors.white;
         canvas.drawRect(scaleRect(line), paint);
       }
+    }
+    for (TextBlock block in visionText.blocks) {
+      for (TextLine line in block.lines) {
+        /*for (TextElement element in line.elements) {
+          paint.color = Colors.green;
+          canvas.drawRect(scaleRect(element), paint);
+        }*/
+        var len = (scaleRect(line).right - scaleRect(line).left).toInt();
+        var charAm = line.text.length.toInt();
+        var fonS = (len / charAm + 5).toDouble();
+        print("@#@ ilość znaków: " +
+            charAm.toString() +
+            " : długość prostokąta: " +
+            len.toString() +
+            " font: " +
+            fonS.toString());
 
-      paint.color = Colors.red;
-      canvas.drawRect(scaleRect(block), paint);
+        final textStyle = TextStyle(
+          color: Colors.black,
+          fontSize: fonS.toDouble(),
+        );
+
+        print("### " + block.text);
+        final textSpan = TextSpan(
+          text: line.text,
+          style: textStyle,
+        );
+
+        final textPainter = TextPainter(
+          text: textSpan,
+          textDirection: TextDirection.ltr,
+          textAlign: TextAlign.left,
+        );
+        textPainter.layout(
+          minWidth: 0,
+          maxWidth: block.boundingBox.width,
+        );
+        final offset = Offset(
+            line.boundingBox.left * scaleX, line.boundingBox.top * scaleY);
+        textPainter.paint(canvas, offset);
+        print("@### " + offset.toString());
+        print("@### " + line.text);
+      }
+      // paint.color = Colors.white;
+      // canvas.drawRect(scaleRect(block), paint);
     }
   }
 
