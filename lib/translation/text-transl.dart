@@ -1,15 +1,7 @@
 import 'dart:convert' show json;
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart' show rootBundle;
-
-import 'package:ar_translator/translation/text-transl.dart';
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
-
 import 'package:flutter_ibm_watson/language_translator/LanguageTranslator.dart';
-import 'package:flutter_ibm_watson/utils/Language.dart';
 import 'package:flutter_ibm_watson/utils/IamOptions.dart';
 
 class TextTransl {
@@ -18,16 +10,10 @@ class TextTransl {
   IamOptions watsonOptions;
   LanguageTranslator watsonTranslator;
 
-  TextTransl(String apiKeyPath, String url) {
-    init(apiKeyPath, url);
-    print("after init");
-  }
-
   Future init(apiKeyPath, url) async {
     this.apiKey = await getAPIKey(apiKeyPath);
-    print("got API Key: ${this.apiKey}");
     this.url = url;
-    this.watsonOptions = await IamOptions(iamApiKey: apiKey, url: url).build();
+    this.watsonOptions = await IamOptions(iamApiKey: apiKey, url: this.url).build();
     this.watsonTranslator = new LanguageTranslator(iamOptions: this.watsonOptions);
   }
 
@@ -44,7 +30,11 @@ class TextTransl {
   String processTextBlock(String textBlock) {
     String processedBlockText;
 
+    // Get rid of newlines
     processedBlockText = textBlock.replaceAll("\n", " ");
+    // Escape backslashes
+    processedBlockText = processedBlockText.replaceAll('\\', "\\\\");
+    // Escape quotation marks
     processedBlockText = processedBlockText.replaceAll('"', "\\\"");
 
     return processedBlockText;
@@ -55,27 +45,22 @@ class TextTransl {
     IdentifyLanguageResult srcLang;
     TranslationResult destTextBlock;
 
-    print("raw text block: $textBlock");
     srcTextBlock = processTextBlock(textBlock);
-    print("processed text block: $srcTextBlock");
-    //srcLang = await watsonTranslator.identifylanguage(srcTextBlock);
-    print("srcLang: $srcLang");
-    //destTextBlock = await watsonTranslator.translate(srcTextBlock, srcLang.toString(), destLang);
-    destTextBlock = await watsonTranslator.translate(srcTextBlock, "en", destLang);
-    print("destTextBlock: $destTextBlock");
+    srcLang = await watsonTranslator.identifylanguage(srcTextBlock);
+    destTextBlock = await watsonTranslator.translate(srcTextBlock, srcLang.toString(), destLang);
 
     return destTextBlock.toString();
   }
 
-  translateAll(VisionText srcText, String destLang) {
+  Future translateAll(VisionText srcText, String destLang) async {
     var destText = [];
 
-    print("whole text:");
     for (TextBlock block in srcText.blocks) {
-      Future <String> destTextBlock;
-      destTextBlock = translateTextBlock(block.text, destLang);
+      String destTextBlock;
+      destTextBlock = await translateTextBlock(block.text, destLang);
       destText.add(destTextBlock);
     }
+    return destText;
   }
 
 }

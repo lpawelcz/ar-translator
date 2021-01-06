@@ -1,15 +1,10 @@
 import 'dart:io';
 
-import 'package:firebase_mlkit_language/firebase_mlkit_language.dart';
 import 'package:ar_translator/translation/text-transl.dart';
 import 'package:flutter/material.dart';
 import 'detector_painters.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
-
-import 'package:flutter_ibm_watson/language_translator/LanguageTranslator.dart';
-import 'package:flutter_ibm_watson/utils/Language.dart';
-import 'package:flutter_ibm_watson/utils/IamOptions.dart';
 
 class ImageOcr extends StatefulWidget {
   @override
@@ -21,8 +16,6 @@ class _ImageOcrState extends State<ImageOcr> {
   VisionText readTextResult;
   Size selectedImageSize;
   bool renderResults = true;
-  final LanguageIdentifier languageIdentifier = FirebaseLanguage.instance.languageIdentifier();
-  final LanguageTranslator plToEng = FirebaseLanguage.instance.languageTranslator(SupportedLanguages.Polish, SupportedLanguages.English);
 
 
   Future selectImage() async {
@@ -51,53 +44,18 @@ class _ImageOcrState extends State<ImageOcr> {
       selectedImageSize = imageSize;
     });
 
-    TextTransl translator = new TextTransl("apikey.json", "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/");
-    translator.translateAll(readTextResult, "pl");
-/*
-    IamOptions options = await IamOptions(iamApiKey: "vkXBrIrcqFyoG5W98eAKpjrlhCtrSzbmAm-blnF8Sgyh", url: "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/").build();
-    LanguageTranslator service = new LanguageTranslator(iamOptions: options);
-
     var destText = [];
-    var srcRawText = [];
-    var srcProcessedText = [];
-    var srcLang = [];
+    String destLang = "pl";
+    TextTransl translator = new TextTransl();
 
-    for (TextBlock block in readText.blocks) {
-      String rawBlockText = block.text;
-      String processedBlockText = block.text.replaceAll("\n", " ");
-      processedBlockText = processedBlockText.replaceAll('"', "\\\"");
-      IdentifyLanguageResult identifyLanguageResult = await service.identifylanguage(processedBlockText);
-      TranslationResult translationResults = await service.translate(processedBlockText, identifyLanguageResult.toString(), Language.POLISH);
-      destText.add(translationResults.toString());
-      srcRawText.add(rawBlockText);
-      srcProcessedText.add(processedBlockText);
-      srcLang.add(identifyLanguageResult);
-    }
+    await translator.init("apikey.json", "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/");
+    destText = await translator.translateAll(readTextResult, destLang);
 
-    print("All together now:");
     int i = 0;
-    for (String translation in destText) {
-      print("Raw source blockText: ${srcRawText[i]}");
-      print("Processed source blockText: ${srcProcessedText[i]}");
-      print("Source language: ${srcLang[i]}");
-      print("Destination blockText: ${destText[i]}");
+    print("Translated text blocks:");
+    for (String textBlock in destText) {
+      print("$i. $textBlock");
       i++;
-    }
-    */
-
-    for (TextBlock block in readText.blocks) {
-      for (TextLine line in block.lines) {
-        final List<LanguageLabel> labels = await languageIdentifier.processText(line.text);
-        for (LanguageLabel label in labels) {
-          final String lngcode = label.languageCode;
-          final double confidence = label.confidence;
-          print(line.text + " --- " + lngcode.toString() + " || " + confidence.toString());
-          if(lngcode != "und"){
-            var transl = await plToEng.processText(line.text);
-            print("TRANSLATED: " + transl.toString());
-          }
-        }
-      }
     }
   }
 
