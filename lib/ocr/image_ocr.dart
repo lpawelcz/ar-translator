@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_mlkit_language/firebase_mlkit_language.dart';
+import 'package:ar_translator/translation/text-transl.dart';
 import 'package:flutter/material.dart';
 import 'detector_painters.dart';
 import 'package:image_picker/image_picker.dart';
@@ -50,6 +51,9 @@ class _ImageOcrState extends State<ImageOcr> {
       selectedImageSize = imageSize;
     });
 
+    TextTransl translator = new TextTransl("apikey.json", "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/", readTextResult, "pl");
+
+/*
     IamOptions options = await IamOptions(iamApiKey: "vkXBrIrcqFyoG5W98eAKpjrlhCtrSzbmAm-blnF8Sgyh", url: "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/").build();
     LanguageTranslator service = new LanguageTranslator(iamOptions: options);
 
@@ -79,6 +83,7 @@ class _ImageOcrState extends State<ImageOcr> {
       print("Destination blockText: ${destText[i]}");
       i++;
     }
+    */
 
     for (TextBlock block in readText.blocks) {
       for (TextLine line in block.lines) {
