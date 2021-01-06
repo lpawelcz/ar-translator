@@ -1,6 +1,6 @@
-import 'dart:ffi';
 import 'dart:io';
 
+import 'package:firebase_mlkit_language/firebase_mlkit_language.dart';
 import 'package:flutter/material.dart';
 import 'detector_painters.dart';
 import 'package:image_picker/image_picker.dart';
@@ -16,6 +16,9 @@ class _ImageOcrState extends State<ImageOcr> {
   VisionText readTextResult;
   Size selectedImageSize;
   bool renderResults = true;
+  final LanguageIdentifier languageIdentifier = FirebaseLanguage.instance.languageIdentifier();
+  final LanguageTranslator plToEng = FirebaseLanguage.instance.languageTranslator(SupportedLanguages.Polish, SupportedLanguages.English);
+
 
   Future selectImage() async {
     var tempStore = await ImagePicker().getImage(source: ImageSource.gallery);
@@ -45,7 +48,16 @@ class _ImageOcrState extends State<ImageOcr> {
 
     for (TextBlock block in readText.blocks) {
       for (TextLine line in block.lines) {
-        // print(line.text);
+        final List<LanguageLabel> labels = await languageIdentifier.processText(line.text);
+        for (LanguageLabel label in labels) {
+          final String lngcode = label.languageCode;
+          final double confidence = label.confidence;
+          print(line.text + " --- " + lngcode.toString() + " || " + confidence.toString());
+          if(lngcode != "und"){
+            var transl = await plToEng.processText(line.text);
+            print("TRANSLATED: " + transl.toString());
+          }
+        }
       }
     }
   }
