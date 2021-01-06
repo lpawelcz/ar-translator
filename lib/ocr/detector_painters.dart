@@ -36,6 +36,8 @@ class TextDetectorPainter extends CustomPainter {
         paint.color = Colors.white;
         canvas.drawRect(scaleRect(line), paint);
       }
+    }
+    for (TextBlock block in visionText.blocks) {
       for (TextLine line in block.lines) {
         /*for (TextElement element in line.elements) {
           paint.color = Colors.green;
@@ -79,7 +81,6 @@ class TextDetectorPainter extends CustomPainter {
       }
       // paint.color = Colors.white;
       // canvas.drawRect(scaleRect(block), paint);
-
     }
   }
 
