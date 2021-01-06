@@ -2,6 +2,10 @@ import 'dart:ui' as ui;
 
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
+=======
+
+>>>>>>> adfbecc86a5b7a10a1a5507768d83358f7e2f7a8
 
 // Paints rectangles around all the text in the image.
 class TextDetectorPainter extends CustomPainter {
@@ -38,6 +42,7 @@ class TextDetectorPainter extends CustomPainter {
           canvas.drawRect(scaleRect(element), paint);
         }
 
+<<<<<<< HEAD
         var len = (scaleRect(line).right - scaleRect(line).left).toInt();
         var charAm = line.text.length.toInt();
         var fonS = (len / charAm + 5).toDouble();
@@ -78,6 +83,28 @@ class TextDetectorPainter extends CustomPainter {
       // paint.color = Colors.white;
       // canvas.drawRect(scaleRect(block), paint);
 
+=======
+      final textStyle = TextStyle(
+        color: Colors.black,
+        fontSize: 15,
+      );
+
+      final textSpan = TextSpan(
+        text: block.text,
+        style: textStyle,
+      );
+      final textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout(
+        minWidth: 0,
+        maxWidth: block.boundingBox.width,
+      );
+      final offset = Offset(block.boundingBox.left * scaleX , block.boundingBox.top * scaleY);
+      textPainter.paint(canvas, offset);
+
+>>>>>>> adfbecc86a5b7a10a1a5507768d83358f7e2f7a8
     }
   }
 
