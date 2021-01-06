@@ -12,26 +12,6 @@ import 'package:flutter_ibm_watson/language_translator/LanguageTranslator.dart';
 import 'package:flutter_ibm_watson/utils/Language.dart';
 import 'package:flutter_ibm_watson/utils/IamOptions.dart';
 
-/*
-class TextTransl extends StatefulWidget {
-  String apiKeyPath;
-  String url;
-  VisionText srcText;
-  String destLang;
-
-  TextTransl(String apiKeyPath, String url, VisionText srcText, String destLang) {
-    this.apiKeyPath = apiKeyPath;
-    this.url = url;
-    this.srcText = srcText;
-    this.destLang = destLang;
-    print("TextTransl constructor");
-  }
-
-  @override
-  State<StatefulWidget> createState() => _TextTranslState();
-}
-*/
-
 class TextTransl {
   String apiKey;
   String url;
@@ -39,16 +19,14 @@ class TextTransl {
   LanguageTranslator watsonTranslator;
 
   TextTransl(String apiKeyPath, String url) {
-    print("_TextTranslState constructor");
-
-    this.apiKey = getAPIKey(apiKeyPath);
-    print("got API Key: ${this.apiKey}");
-    this.url = url;
-    init(this.apiKey, this.url);
+    init(apiKeyPath, url);
     print("after init");
   }
 
-  Future init(apiKey, url) async {
+  Future init(apiKeyPath, url) async {
+    this.apiKey = await getAPIKey(apiKeyPath);
+    print("got API Key: ${this.apiKey}");
+    this.url = url;
     this.watsonOptions = await IamOptions(iamApiKey: apiKey, url: url).build();
     this.watsonTranslator = new LanguageTranslator(iamOptions: this.watsonOptions);
   }
@@ -72,24 +50,19 @@ class TextTransl {
     return processedBlockText;
   }
 
-  /*
-  Future<String> indentifyLanguage(String textBlock) async {
-    IdentifyLanguageResult identifyLanguageResult;
-
-    identifyLanguageResult = await watsonTranslator.identifylanguage(textBlock);
-
-    return identifyLanguageResult.toString();
-  }
-  */
-
   Future<String> translateTextBlock(String textBlock, String destLang) async {
     String srcTextBlock;
     IdentifyLanguageResult srcLang;
     TranslationResult destTextBlock;
 
+    print("raw text block: $textBlock");
     srcTextBlock = processTextBlock(textBlock);
-    srcLang = await watsonTranslator.identifylanguage(textBlock);
-    destTextBlock = await watsonTranslator.translate(srcTextBlock, srcLang.toString(), destLang);
+    print("processed text block: $srcTextBlock");
+    //srcLang = await watsonTranslator.identifylanguage(srcTextBlock);
+    print("srcLang: $srcLang");
+    //destTextBlock = await watsonTranslator.translate(srcTextBlock, srcLang.toString(), destLang);
+    destTextBlock = await watsonTranslator.translate(srcTextBlock, "en", destLang);
+    print("destTextBlock: $destTextBlock");
 
     return destTextBlock.toString();
   }
@@ -102,7 +75,6 @@ class TextTransl {
       Future <String> destTextBlock;
       destTextBlock = translateTextBlock(block.text, destLang);
       destText.add(destTextBlock);
-      print(destTextBlock);
     }
   }
 
