@@ -1,4 +1,4 @@
-import 'package:ar_translator/live_translate/live_translate.dart';
+import 'package:ar_translator/ocr/image_ocr.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -153,16 +153,9 @@ class _MyHomePageState extends State<MyHomePage> {
 class LiveTranslate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return CameraPreviewScanner();
-  }
-}
-
-class PhotoTranslate extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Photo Translate"),
+        title: Text("Camera Translate"),
       ),
       body: Center(
         child: ElevatedButton(
@@ -173,6 +166,13 @@ class PhotoTranslate extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class PhotoTranslate extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ImageOcr();
   }
 }
 
