@@ -2,7 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
-
+import 'package:auto_size_text/auto_size_text.dart';
 
 // Paints rectangles around all the text in the image.
 class TextDetectorPainter extends CustomPainter {
@@ -29,7 +29,7 @@ class TextDetectorPainter extends CustomPainter {
     }
 
     final Paint paint = Paint()
-      ..style = PaintingStyle.fill
+      ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
     for (TextBlock block in visionText.blocks) {
@@ -38,7 +38,10 @@ class TextDetectorPainter extends CustomPainter {
 
       final textStyle = TextStyle(
         color: Colors.black,
-        fontSize: 15,
+        fontSize: ((scaleRect(block).bottom * scaleY - 10) -
+                (scaleRect(block).top) * scaleY -
+                10) *
+            scaleX,
       );
 
       final textSpan = TextSpan(
@@ -53,9 +56,9 @@ class TextDetectorPainter extends CustomPainter {
         minWidth: 0,
         maxWidth: block.boundingBox.width,
       );
-      final offset = Offset(block.boundingBox.left * scaleX , block.boundingBox.top * scaleY);
+      final offset = Offset(
+          block.boundingBox.left * scaleX, block.boundingBox.top * scaleY);
       textPainter.paint(canvas, offset);
-
     }
   }
 
