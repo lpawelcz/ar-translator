@@ -1,7 +1,11 @@
+import 'package:ar_translator/ocr/image_ocr.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-void main() {
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -151,7 +155,7 @@ class LiveTranslate extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Live Translate"),
+        title: Text("Camera Translate"),
       ),
       body: Center(
         child: ElevatedButton(
@@ -168,19 +172,7 @@ class LiveTranslate extends StatelessWidget {
 class PhotoTranslate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Photo Translate"),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          child: Text("zawracamy"),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-    );
+    return ImageOcr();
   }
 }
 
