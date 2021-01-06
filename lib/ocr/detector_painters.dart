@@ -70,9 +70,10 @@ class TextDetectorPainter extends CustomPainter {
           maxWidth: block.boundingBox.width,
         );
         final offset = Offset(
-            block.boundingBox.left * scaleX, block.boundingBox.top * scaleY);
+            line.boundingBox.left * scaleX, line.boundingBox.top * scaleY);
         textPainter.paint(canvas, offset);
         print("@### " + offset.toString());
+        print("@### " + line.text);
       }
       // paint.color = Colors.white;
       // canvas.drawRect(scaleRect(block), paint);
