@@ -40,9 +40,6 @@ class _ImageOcrState extends State<ImageOcr> {
     FirebaseVisionImage FBImage = FirebaseVisionImage.fromFile(File(selectedImage.path));
     TextRecognizer recognizeText = FirebaseVision.instance.textRecognizer();
     VisionText readText = await recognizeText.processImage(FBImage);
-    print("Read text: $readText");
-    var dupa = readText.text;
-    print("read dupa text: $dupa");
 
     var decodedImage = await decodeImageFromList(File(selectedImage.path).readAsBytesSync());
     Size imageSize = Size(decodedImage.width.toDouble(), decodedImage.height.toDouble());
@@ -58,16 +55,11 @@ class _ImageOcrState extends State<ImageOcr> {
 
     for (TextBlock block in readText.blocks) {
       String blockText = block.text.replaceAll("\n", " ");
-      print("block: $blockText");
-      TranslationResult translationResults = await service.translate(blockText, Language.ENGLISH, Language.POLISH);
-      print("translation result:");
-      print(translationResults.characterCount);
-      print(translationResults.wordCount);
-      print(translationResults.translations);
-      print(translationResults);
-
       IdentifyLanguageResult identifyLanguageResult = await service.identifylanguage(blockText);
       print("identification result: $identifyLanguageResult");
+      TranslationResult translationResults = await service.translate(blockText, identifyLanguageResult.toString(), Language.POLISH);
+      print("translation result:");
+      print(translationResults);
     }
 
     for (TextBlock block in readText.blocks) {
