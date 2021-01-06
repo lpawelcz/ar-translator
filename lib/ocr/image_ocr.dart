@@ -51,8 +51,8 @@ class _ImageOcrState extends State<ImageOcr> {
       selectedImageSize = imageSize;
     });
 
-    TextTransl translator = new TextTransl("apikey.json", "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/", readTextResult, "pl");
-
+    TextTransl translator = new TextTransl("apikey.json", "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/");
+    translator.translateAll(readTextResult, "pl");
 /*
     IamOptions options = await IamOptions(iamApiKey: "vkXBrIrcqFyoG5W98eAKpjrlhCtrSzbmAm-blnF8Sgyh", url: "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/").build();
     LanguageTranslator service = new LanguageTranslator(iamOptions: options);

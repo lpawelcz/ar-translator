@@ -12,6 +12,7 @@ import 'package:flutter_ibm_watson/language_translator/LanguageTranslator.dart';
 import 'package:flutter_ibm_watson/utils/Language.dart';
 import 'package:flutter_ibm_watson/utils/IamOptions.dart';
 
+/*
 class TextTransl extends StatefulWidget {
   String apiKeyPath;
   String url;
@@ -29,30 +30,22 @@ class TextTransl extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _TextTranslState();
 }
+*/
 
-class _TextTranslState extends State<TextTransl>{
+class TextTransl {
   String apiKey;
   String url;
   IamOptions watsonOptions;
   LanguageTranslator watsonTranslator;
 
-  _TextTranslState() {
+  TextTransl(String apiKeyPath, String url) {
     print("_TextTranslState constructor");
-    getAPIKey(widget.apiKeyPath).then((String apiKeyS) {
-      setState(() {
-        this.apiKey = apiKeyS;
-      });
-    });
-    print("got API Key: $apiKey");
+
+    this.apiKey = getAPIKey(apiKeyPath);
+    print("got API Key: ${this.apiKey}");
     this.url = url;
     init(this.apiKey, this.url);
     print("after init");
-
-    setState(() {
-      print("begin translate all");
-      translateAll(widget.srcText, widget.destLang);
-      print("end translate all");
-    });
   }
 
   Future init(apiKey, url) async {
@@ -111,15 +104,6 @@ class _TextTranslState extends State<TextTransl>{
       destText.add(destTextBlock);
       print(destTextBlock);
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: Center(
-          child: _TextTranslState(),
-        ),
-    );
   }
 
 }
