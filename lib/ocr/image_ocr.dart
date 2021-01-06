@@ -54,7 +54,11 @@ class _ImageOcrState extends State<ImageOcr> {
     LanguageTranslator service = new LanguageTranslator(iamOptions: options);
 
     for (TextBlock block in readText.blocks) {
+      String block_text = block.text;
+      print("Raw blockText: $block_text");
       String blockText = block.text.replaceAll("\n", " ");
+      blockText = blockText.replaceAll('"', "\\\"");
+      print("no-newline blockText: $blockText");
       IdentifyLanguageResult identifyLanguageResult = await service.identifylanguage(blockText);
       print("identification result: $identifyLanguageResult");
       TranslationResult translationResults = await service.translate(blockText, identifyLanguageResult.toString(), Language.POLISH);
