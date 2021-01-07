@@ -27,7 +27,6 @@ class _LiveOcrState extends State<LiveOcr> {
     super.initState();
   }
 
-
   Future _readText(VisionText text) async {
     Size imageSize = Size(
       _scanKey.currentState.cameraValue.previewSize.height,
@@ -40,15 +39,14 @@ class _LiveOcrState extends State<LiveOcr> {
     });
   }
 
-
   Future _onMenuAction(String option) async {
-    if(option == MenuOptions.Copy){
+    if (option == MenuOptions.Copy) {
       print('Copy');
-    }else if(option == MenuOptions.RenderResults){
+    } else if (option == MenuOptions.RenderResults) {
       setState(() {
         renderResults = !renderResults;
       });
-    }else if(option == MenuOptions.GoBack){
+    } else if (option == MenuOptions.GoBack) {
       Navigator.pop(context);
     }
   }
@@ -57,13 +55,17 @@ class _LiveOcrState extends State<LiveOcr> {
     const Text noResultsText = Text('No results!');
     if (readTextResult == null) {
       print(noResultsText);
-      return Center(child: noResultsText,);
+      return Center(
+        child: noResultsText,
+      );
     }
 
     print("RESULTSSSSS COUNT: " + readTextResult.blocks.length.toString());
 
+    List<dynamic> translated;
+
     return CustomPaint(
-      painter: TextDetectorPainter(cameraSize, readTextResult),
+      painter: TextDetectorPainter(cameraSize, readTextResult, translated),
     );
   }
 
@@ -75,53 +77,47 @@ class _LiveOcrState extends State<LiveOcr> {
         actions: <Widget>[
           PopupMenuButton<String>(
               onSelected: _onMenuAction,
-              itemBuilder: (BuildContext context){
-                return MenuOptions.choices.map((String choice){
+              itemBuilder: (BuildContext context) {
+                return MenuOptions.choices.map((String choice) {
                   return PopupMenuItem<String>(
                     value: choice,
                     child: Text(choice),
                   );
                 }).toList();
-              }
-          )
+              })
         ],
       ),
       body: Center(
           child: Container(
-              color: Colors.black,
-              child: Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                CameraMlVision<VisionText>(
-                  key: _scanKey,
-                  detector: textRecognizer.processImage,
-                  onResult: _readText,
-                  resolution: resolutionPreset,
-                  cameraLensDirection: CameraLensDirection.back,
-                  onDispose: () {
-                    textRecognizer.close();
-                    },
-                ),
-                Visibility(
-                  visible: renderResults,
-                  child: _resultsRenderer(),
-                ),
-              ],
+        color: Colors.black,
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            CameraMlVision<VisionText>(
+              key: _scanKey,
+              detector: textRecognizer.processImage,
+              onResult: _readText,
+              resolution: resolutionPreset,
+              cameraLensDirection: CameraLensDirection.back,
+              onDispose: () {
+                textRecognizer.close();
+              },
             ),
-          )
-      ),
+            Visibility(
+              visible: renderResults,
+              child: _resultsRenderer(),
+            ),
+          ],
+        ),
+      )),
     );
   }
 }
 
-class MenuOptions{
+class MenuOptions {
   static const String RenderResults = 'Render Results';
   static const String Copy = 'Copy';
   static const String GoBack = 'Go Back';
 
-  static const List<String> choices = <String>[
-    RenderResults,
-    Copy,
-    GoBack
-  ];
+  static const List<String> choices = <String>[RenderResults, Copy, GoBack];
 }

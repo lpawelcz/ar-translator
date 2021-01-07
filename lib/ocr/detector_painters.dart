@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 
 // Paints rectangles around all the text in the image.
 class TextDetectorPainter extends CustomPainter {
-  TextDetectorPainter(this.absoluteImageSize, this.visionText);
+  TextDetectorPainter(
+      this.absoluteImageSize, this.visionText, this.translatedText);
 
   final Size absoluteImageSize;
   final VisionText visionText;
+  final List<dynamic> translatedText;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -37,10 +39,20 @@ class TextDetectorPainter extends CustomPainter {
         canvas.drawRect(scaleRect(line), paint);
       }
     }
+    // int i = 0;
+    // print("@@@ testowanko tłumaczenia :");
+    // for (String textBlock in translatedText) {
+    //   print("$i. $textBlock");
+    //   i++;
+    // }
+
+    int i = 0;
     for (TextBlock block in visionText.blocks) {
       for (TextLine line in block.lines) {
+        String translatedTextLine = translatedText[i];
         var len = (scaleRect(line).right - scaleRect(line).left).toInt();
-        var charAm = line.text.length.toInt();
+        var charAm = translatedTextLine.length.toInt();
+        // var charAm = translatedText[i].length.toInt();
         var fonS = (len / charAm + 5).toDouble();
         print("@#@ ilość znaków: " +
             charAm.toString() +
@@ -56,9 +68,12 @@ class TextDetectorPainter extends CustomPainter {
 
         print("### " + block.text);
         final textSpan = TextSpan(
-          text: line.text,
+          // text: line.text,
+          text: translatedTextLine,
           style: textStyle,
         );
+
+        i = i + 1;
 
         final textPainter = TextPainter(
           text: textSpan,
