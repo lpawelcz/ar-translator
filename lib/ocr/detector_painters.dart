@@ -39,10 +39,6 @@ class TextDetectorPainter extends CustomPainter {
     }
     for (TextBlock block in visionText.blocks) {
       for (TextLine line in block.lines) {
-        /*for (TextElement element in line.elements) {
-          paint.color = Colors.green;
-          canvas.drawRect(scaleRect(element), paint);
-        }*/
         var len = (scaleRect(line).right - scaleRect(line).left).toInt();
         var charAm = line.text.length.toInt();
         var fonS = (len / charAm + 5).toDouble();
@@ -79,8 +75,6 @@ class TextDetectorPainter extends CustomPainter {
         print("@### " + offset.toString());
         print("@### " + line.text);
       }
-      // paint.color = Colors.white;
-      // canvas.drawRect(scaleRect(block), paint);
     }
   }
 

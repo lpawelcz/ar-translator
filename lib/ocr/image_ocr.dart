@@ -20,16 +20,16 @@ class _ImageOcrState extends State<ImageOcr> {
   final LanguageTranslator plToEng = FirebaseLanguage.instance.languageTranslator(SupportedLanguages.Polish, SupportedLanguages.English);
 
 
-  Future selectImage() async {
+  Future _selectImage() async {
     var tempStore = await ImagePicker().getImage(source: ImageSource.gallery);
 
     setState(() {
       selectedImage = tempStore;
-      readText();
+      _readText();
     });
   }
 
-  Future readText() async {
+  Future _readText() async {
     if(selectedImage==null){
       return;
     }
@@ -67,16 +67,16 @@ class _ImageOcrState extends State<ImageOcr> {
     const Text noResultsText = Text('No results!');
     if (readTextResult == null) {
       print(noResultsText);
-      return noResultsText;
+      return Center(child: noResultsText,);
     }
     return CustomPaint(
       painter: TextDetectorPainter(selectedImageSize, readTextResult),
     );
   }
 
-  Future onMenuAction(String option) async {
+  Future _onMenuAction(String option) async {
     if(option == MenuOptions.ReReadText){
-      readText();
+      _readText();
     }else if(option == MenuOptions.Copy){
       print('Copy');
     }else if(option == MenuOptions.RenderResults){
@@ -86,7 +86,7 @@ class _ImageOcrState extends State<ImageOcr> {
     }else if(option == MenuOptions.GoBack){
       Navigator.pop(context);
     }else if(option == MenuOptions.SelectImage){
-      selectImage();
+      _selectImage();
     }
   }
 
@@ -97,7 +97,7 @@ class _ImageOcrState extends State<ImageOcr> {
           title: const Text('Photo Translator'),
           actions: <Widget>[
             PopupMenuButton<String>(
-                onSelected: onMenuAction,
+                onSelected: _onMenuAction,
                 itemBuilder: (BuildContext context){
                   return MenuOptions.choices.map((String choice){
                     return PopupMenuItem<String>(
@@ -129,7 +129,7 @@ class _ImageOcrState extends State<ImageOcr> {
         ),
         floatingActionButton: Visibility(
           child: FloatingActionButton(
-            onPressed: selectImage,
+            onPressed: _selectImage,
             child: Icon(Icons.add_outlined),
           ),
           visible: selectedImage==null,
