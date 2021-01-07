@@ -65,7 +65,12 @@ class TextTranslator {
     destTextBlock = await watsonTranslator.translate(
         srcTextBlock, srcLang.toString(), destLang);
 
-    return destTextBlock.translations.toString();
+    if (destTextBlock.translations == null ||
+        destTextBlock.translations[0]['translation'] == "null") {
+      return " ";
+    } else {
+      return destTextBlock.translations[0]['translation'];
+    }
   }
 
   Future translateAll(VisionText srcText, String destLang) async {
