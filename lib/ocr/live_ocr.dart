@@ -2,6 +2,7 @@ import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_camera_ml_vision/flutter_camera_ml_vision.dart';
+import 'package:ar_translator/translation/text-transl.dart';
 
 import 'detector_painters.dart';
 
@@ -38,6 +39,25 @@ class _LiveOcrState extends State<LiveOcr> {
       readTextResult = text;
       cameraSize = imageSize;
     });
+
+    var destText = [];
+    String destLang = "pl";
+    TextTranslator translator = new TextTranslator();
+
+    await translator.init("apikey.json",
+        "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/");
+    destText = await translator.translateAll(text, destLang);
+
+    // int i = 0;
+    // print("Translated text blocks:");
+    // for (String textBlock in destText) {
+    //   print("$i. $textBlock");
+    //   i++;
+    // }
+
+    setState(() {
+      translatedText = destText;
+    });
   }
 
   Future _onMenuAction(String option) async {
@@ -63,7 +83,7 @@ class _LiveOcrState extends State<LiveOcr> {
 
     print("RESULTSSSSS COUNT: " + readTextResult.blocks.length.toString());
 
-    if (translatedText.isEmpty) {
+    if (translatedText == null) {
       return CustomPaint(
         painter: TextDetectorPainter(cameraSize, readTextResult),
       );
