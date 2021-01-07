@@ -1,13 +1,9 @@
-import 'dart:typed_data';
-
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter_camera_ml_vision/flutter_camera_ml_vision.dart';
 
 import 'detector_painters.dart';
-
-List<CameraDescription> cameras;
 
 class LiveOcr extends StatefulWidget {
   @override
@@ -15,144 +11,40 @@ class LiveOcr extends StatefulWidget {
 }
 
 class _LiveOcrState extends State<LiveOcr> {
-  CameraController camController;
-  bool camMounted = false;
   bool renderResults = true;
+
+  final _scanKey = GlobalKey<CameraMlVisionState>();
 
   VisionText readTextResult;
   Size cameraSize;
 
+  ResolutionPreset resolutionPreset = ResolutionPreset.high;
 
-  final int cameraDirectionBack = 0;
-  final int cameraDirectionFront = 1;
+  TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
 
-  int cameraDirection;
-  bool isDetecting = false;
+  final CameraLensDirection cameraDirectionBack = CameraLensDirection.back;
+  final CameraLensDirection cameraDirectionFront = CameraLensDirection.front;
+
+  CameraLensDirection cameraDirection;
 
 
   @override
   void initState() {
     super.initState();
     cameraDirection = cameraDirectionBack;
-    _initializeCamera();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // App state changed before we got the chance to initialize.
-    if (camController == null || !camController.value.isInitialized) {
-      return;
-    }
-    if (state == AppLifecycleState.inactive) {
-      camController?.dispose();
-    } else if (state == AppLifecycleState.resumed) {
-      if (camController != null) {
-        _initializeCamera();
-      }
-    }
-  }
 
-  Future<void> _initializeCamera() async {
-    cameras = await availableCameras();
-
-    if (camController != null) {
-      await camController.dispose();
-    }
-
-    camController = CameraController(cameras[cameraDirection], ResolutionPreset.medium);
-
-    // If the controller is updated then update the UI.
-    camController.addListener(() {
-      if (mounted) setState(() {});
-      if (camController.value.hasError) {
-        print('Camera error ${camController.value.errorDescription}');
-      }
-    });
-
-    try {
-      camController.initialize().then((_) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          camMounted = true;
-          cameraSize = Size(
-            camController.value.previewSize.height,
-            camController.value.previewSize.width,
-          );
-        });
-
-        camController.startImageStream((CameraImage image) {
-          if (isDetecting) return;
-
-          print("Detectomg!!!");
-
-          isDetecting = true;
-
-          _readText(image).then((dynamic results){
-            setState(() {
-              readTextResult = results;
-              isDetecting = false;
-            });
-          });
-        }).whenComplete(() => isDetecting = false);
-      });
-    } on CameraException catch (e) {
-    print(e);
-    }
-  }
-
-  static FirebaseVisionImageMetadata _buildMetaData(
-      CameraImage image,
-      ImageRotation rotation,
-      ) {
-    return FirebaseVisionImageMetadata(
-      rawFormat: image.format.raw,
-      size: Size(image.width.toDouble(), image.height.toDouble()),
-      rotation: rotation,
-      planeData: image.planes.map(
-            (Plane plane) {
-          return FirebaseVisionImagePlaneMetadata(
-            bytesPerRow: plane.bytesPerRow,
-            height: plane.height,
-            width: plane.width,
-          );
-        },
-      ).toList(),
+  Future _readText(VisionText text) async {
+    Size imageSize = Size(
+      _scanKey.currentState.cameraValue.previewSize.height,
+      _scanKey.currentState.cameraValue.previewSize.width,
     );
-  }
 
-  static ImageRotation _rotationIntToImageRotation(int rotation) {
-    switch (rotation) {
-      case 0:
-        return ImageRotation.rotation0;
-      case 90:
-        return ImageRotation.rotation90;
-      case 180:
-        return ImageRotation.rotation180;
-      default:
-        assert(rotation == 270);
-        return ImageRotation.rotation270;
-    }
-  }
-
-
-  static Uint8List _concatenatePlanes(List<Plane> planes) {
-    final WriteBuffer allBytes = WriteBuffer();
-    for (Plane plane in planes) {
-      allBytes.putUint8List(plane.bytes);
-    }
-    return allBytes.done().buffer.asUint8List();
-  }
-
-  Future _readText(CameraImage image) async {
-    FirebaseVisionImage FBImage =
-    FirebaseVisionImage
-        .fromBytes(
-        _concatenatePlanes(image.planes),
-        _buildMetaData(image, _rotationIntToImageRotation(cameras[cameraDirection].sensorOrientation)));
-    TextRecognizer recognizeText = FirebaseVision.instance.textRecognizer();
-    return recognizeText.processImage(FBImage);
+    setState(() {
+      readTextResult = text;
+      cameraSize = imageSize;
+    });
   }
 
 
@@ -171,20 +63,15 @@ class _LiveOcrState extends State<LiveOcr> {
   }
 
   Future _changeCamera() async {
-    await camController.stopImageStream();
-    camController.dispose();
     if(cameraDirection == cameraDirectionBack){
-      cameraDirection = cameraDirectionFront;
+      setState(() {
+        cameraDirection = cameraDirectionFront;
+      });
     }else{
-      cameraDirection = cameraDirectionBack;
+      setState(() {
+        cameraDirection = cameraDirectionBack;
+      });
     }
-    setState(() {
-      camMounted = false;
-    });
-    await _initializeCamera();
-    setState(() {
-      camMounted = true;
-    });
   }
 
   Widget _resultsRenderer() {
@@ -221,14 +108,21 @@ class _LiveOcrState extends State<LiveOcr> {
         ],
       ),
       body: Center(
-          child: (camMounted == false && camController == null)
-              ? Text('Camera not Initialized')
-              : Container(
+          child: Container(
               color: Colors.black,
               child: Stack(
               fit: StackFit.expand,
               children: <Widget>[
-                CameraPreview(camController),
+                CameraMlVision<VisionText>(
+                  key: _scanKey,
+                  detector: textRecognizer.processImage,
+                  onResult: _readText,
+                  resolution: resolutionPreset,
+                  cameraLensDirection: cameraDirection,
+                  onDispose: () {
+                    textRecognizer.close();
+                    },
+                ),
                 Visibility(
                   visible: renderResults,
                   child: _resultsRenderer(),
@@ -242,13 +136,6 @@ class _LiveOcrState extends State<LiveOcr> {
         child: Icon(Icons.camera),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    camController.stopImageStream();
-    camController?.dispose();
-    super.dispose();
   }
 }
 
