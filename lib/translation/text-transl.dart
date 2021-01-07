@@ -4,7 +4,7 @@ import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter_ibm_watson/language_translator/LanguageTranslator.dart';
 import 'package:flutter_ibm_watson/utils/IamOptions.dart';
 
-class TextTransl {
+class TextTranslator {
   String apiKey;
   String url;
   IamOptions watsonOptions;

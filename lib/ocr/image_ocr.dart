@@ -46,7 +46,7 @@ class _ImageOcrState extends State<ImageOcr> {
 
     var destText = [];
     String destLang = "pl";
-    TextTransl translator = new TextTransl();
+    TextTranslator translator = new TextTranslator();
 
     await translator.init("apikey.json", "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/");
     destText = await translator.translateAll(readTextResult, destLang);
