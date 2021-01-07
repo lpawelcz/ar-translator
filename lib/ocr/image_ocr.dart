@@ -41,7 +41,6 @@ class _ImageOcrState extends State<ImageOcr> {
     Size imageSize =
         Size(decodedImage.width.toDouble(), decodedImage.height.toDouble());
     print(imageSize);
-    //tutaj if, jeżeli nie ma tekstu tłumaczonego w parametrze to wykonać state dopiero później
     setState(() {
       readTextResult = readText;
       selectedImageSize = imageSize;
