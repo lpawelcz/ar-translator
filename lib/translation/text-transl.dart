@@ -67,7 +67,7 @@ class TextTranslator {
 
     if (destTextBlock.translations == null ||
         destTextBlock.translations[0]['translation'] == "null") {
-      return " ";
+      return textLine;
     } else {
       return destTextBlock.translations[0]['translation'];
     }
