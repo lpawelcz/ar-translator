@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 
 // Paints rectangles around all the text in the image.
 class TextDetectorPainter extends CustomPainter {
-  TextDetectorPainter(
+  TextDetectorPainter(this.absoluteImageSize, this.visionText);
+
+  TextDetectorPainter.formTextDetectorPainter(
       this.absoluteImageSize, this.visionText, this.translatedText);
 
   final Size absoluteImageSize;
   final VisionText visionText;
-  final List<dynamic> translatedText;
+  List<dynamic> translatedText;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -40,10 +42,15 @@ class TextDetectorPainter extends CustomPainter {
     int i = 0;
     for (TextBlock block in visionText.blocks) {
       for (TextLine line in block.lines) {
-        String translatedTextLine = translatedText[i];
+        String translatedTextLine = line.text;
         var len = (scaleRect(line).right - scaleRect(line).left).toInt();
-        var charAm = translatedTextLine.length.toInt();
+        var charAm = line.text.length;
         var fonS = (len / charAm + 5).toDouble();
+
+        if (translatedText != null) {
+          charAm = line.text.length.toInt();
+          translatedTextLine = translatedText[i].toString();
+        }
 
         final textStyle = TextStyle(
           color: Colors.black,
@@ -67,7 +74,7 @@ class TextDetectorPainter extends CustomPainter {
           maxWidth: block.boundingBox.width,
         );
         final offset = Offset(
-            line.boundingBox.left * scaleX, line.boundingBox.top * scaleY);
+            line.boundingBox.left * scaleX - 4, line.boundingBox.top * scaleY);
         textPainter.paint(canvas, offset);
       }
     }
@@ -76,6 +83,7 @@ class TextDetectorPainter extends CustomPainter {
   @override
   bool shouldRepaint(TextDetectorPainter oldDelegate) {
     return oldDelegate.absoluteImageSize != absoluteImageSize ||
-        oldDelegate.visionText != visionText;
+        oldDelegate.visionText != visionText ||
+        oldDelegate.translatedText != translatedText;
   }
 }

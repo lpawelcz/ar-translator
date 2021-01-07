@@ -41,11 +41,11 @@ class _ImageOcrState extends State<ImageOcr> {
     Size imageSize =
         Size(decodedImage.width.toDouble(), decodedImage.height.toDouble());
     print(imageSize);
-
-    // setState(() {
-    //   readTextResult = readText;
-    //   selectedImageSize = imageSize;
-    // });
+    //tutaj if, jeżeli nie ma tekstu tłumaczonego w parametrze to wykonać state dopiero później
+    setState(() {
+      readTextResult = readText;
+      selectedImageSize = imageSize;
+    });
 
     var destText = [];
     String destLang = "pl";
@@ -63,8 +63,6 @@ class _ImageOcrState extends State<ImageOcr> {
     // }
 
     setState(() {
-      readTextResult = readText;
-      selectedImageSize = imageSize;
       translateTextResult = destText;
     });
   }
@@ -77,10 +75,16 @@ class _ImageOcrState extends State<ImageOcr> {
         child: noResultsText,
       );
     }
-    return CustomPaint(
-      painter: TextDetectorPainter(
-          selectedImageSize, readTextResult, translateTextResult),
-    );
+    if (translateTextResult == null) {
+      return CustomPaint(
+        painter: TextDetectorPainter(selectedImageSize, readTextResult),
+      );
+    } else {
+      return CustomPaint(
+        painter: TextDetectorPainter.formTextDetectorPainter(
+            selectedImageSize, readTextResult, translateTextResult),
+      );
+    }
   }
 
   Future _onMenuAction(String option) async {

@@ -17,6 +17,7 @@ class _LiveOcrState extends State<LiveOcr> {
 
   VisionText readTextResult;
   Size cameraSize;
+  List<dynamic> translatedText;
 
   ResolutionPreset resolutionPreset = ResolutionPreset.high;
 
@@ -62,11 +63,16 @@ class _LiveOcrState extends State<LiveOcr> {
 
     print("RESULTSSSSS COUNT: " + readTextResult.blocks.length.toString());
 
-    List<dynamic> translated;
-
-    return CustomPaint(
-      painter: TextDetectorPainter(cameraSize, readTextResult, translated),
-    );
+    if (translatedText.isEmpty) {
+      return CustomPaint(
+        painter: TextDetectorPainter(cameraSize, readTextResult),
+      );
+    } else {
+      return CustomPaint(
+        painter: TextDetectorPainter.formTextDetectorPainter(
+            cameraSize, readTextResult, translatedText),
+      );
+    }
   }
 
   @override
