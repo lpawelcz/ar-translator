@@ -32,7 +32,7 @@ dependencies:
   camera: ^0.5.6+1
   firebase_core: 0.5.0
   image_picker: ^0.6.7+17
-  flutter_ibm_watson: ^0.0.1
+  flutter_ibm_watson: ^0.0.4
 
 dev_dependencies:
   flutter_test:
