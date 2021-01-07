@@ -75,26 +75,14 @@ class TextTranslator {
 
   Future translateAll(VisionText srcText, String destLang) async {
     var destText = [];
-    // print("?? translate all1: ");
-    // for (var l in destText) {
-    //   print("?? " + l.toString());
-    // }
 
-    print("?? translate all 2:");
     for (TextBlock block in srcText.blocks) {
       for (TextLine line in block.lines) {
         String destTextBlock;
-        print("?? " + line.text);
-        // destTextBlock = await translateTextBlock(block.text, destLang);
         destTextBlock = await translateTextLine(line.text, destLang);
         destText.add(destTextBlock);
       }
     }
-
-    // print("?? translate all 3: ");
-    // for (var l in destText) {
-    //   print("?? " + l.toString());
-    // }
 
     return destText;
   }

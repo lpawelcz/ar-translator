@@ -17,9 +17,6 @@ class TextDetectorPainter extends CustomPainter {
     final double scaleX = size.width / absoluteImageSize.width;
     final double scaleY = size.height / absoluteImageSize.height;
 
-    print(size.width.toString() + " " + absoluteImageSize.width.toString());
-    print(size.height.toString() + " " + absoluteImageSize.height.toString());
-
     Rect scaleRect(TextContainer container) {
       return Rect.fromLTRB(
         container.boundingBox.left * scaleX - 10,
@@ -39,12 +36,6 @@ class TextDetectorPainter extends CustomPainter {
         canvas.drawRect(scaleRect(line), paint);
       }
     }
-    // int i = 0;
-    // print("@@@ testowanko tłumaczenia :");
-    // for (String textBlock in translatedText) {
-    //   print("$i. $textBlock");
-    //   i++;
-    // }
 
     int i = 0;
     for (TextBlock block in visionText.blocks) {
@@ -52,23 +43,14 @@ class TextDetectorPainter extends CustomPainter {
         String translatedTextLine = translatedText[i];
         var len = (scaleRect(line).right - scaleRect(line).left).toInt();
         var charAm = translatedTextLine.length.toInt();
-        // var charAm = translatedText[i].length.toInt();
         var fonS = (len / charAm + 5).toDouble();
-        print("@#@ ilość znaków: " +
-            charAm.toString() +
-            " : długość prostokąta: " +
-            len.toString() +
-            " font: " +
-            fonS.toString());
 
         final textStyle = TextStyle(
           color: Colors.black,
           fontSize: fonS.toDouble(),
         );
 
-        print("### " + block.text);
         final textSpan = TextSpan(
-          // text: line.text,
           text: translatedTextLine,
           style: textStyle,
         );
@@ -87,8 +69,6 @@ class TextDetectorPainter extends CustomPainter {
         final offset = Offset(
             line.boundingBox.left * scaleX, line.boundingBox.top * scaleY);
         textPainter.paint(canvas, offset);
-        print("@### " + offset.toString());
-        print("@### " + line.text);
       }
     }
   }

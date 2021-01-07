@@ -36,13 +36,6 @@ class _ImageOcrState extends State<ImageOcr> {
     TextRecognizer recognizeText = FirebaseVision.instance.textRecognizer();
     VisionText readText = await recognizeText.processImage(FBImage);
 
-    print("?? Co tam mamy w wczytanym tekście: ");
-    for (var b in readText.blocks) {
-      for (var l in b.lines) {
-        print("?? " + l.text);
-      }
-    }
-
     var decodedImage =
         await decodeImageFromList(File(selectedImage.path).readAsBytesSync());
     Size imageSize =
@@ -62,12 +55,12 @@ class _ImageOcrState extends State<ImageOcr> {
         "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/");
     destText = await translator.translateAll(readText, destLang);
 
-    int i = 0;
-    print("Translated text blocks:");
-    for (String textBlock in destText) {
-      print("$i. $textBlock");
-      i++;
-    }
+    // int i = 0;
+    // print("Translated text blocks:");
+    // for (String textBlock in destText) {
+    //   print("$i. $textBlock");
+    //   i++;
+    // }
 
     setState(() {
       readTextResult = readText;
