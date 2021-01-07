@@ -1,4 +1,5 @@
 import 'package:ar_translator/ocr/image_ocr.dart';
+import 'package:ar_translator/ocr/live_ocr.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -153,19 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
 class LiveTranslate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Camera Translate"),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          child: Text("zawracamy"),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-    );
+    return LiveOcr();
   }
 }
 
