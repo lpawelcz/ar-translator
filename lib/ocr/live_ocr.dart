@@ -22,16 +22,9 @@ class _LiveOcrState extends State<LiveOcr> {
 
   TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
 
-  final CameraLensDirection cameraDirectionBack = CameraLensDirection.back;
-  final CameraLensDirection cameraDirectionFront = CameraLensDirection.front;
-
-  CameraLensDirection cameraDirection;
-
-
   @override
   void initState() {
     super.initState();
-    cameraDirection = cameraDirectionBack;
   }
 
 
@@ -57,20 +50,6 @@ class _LiveOcrState extends State<LiveOcr> {
       });
     }else if(option == MenuOptions.GoBack){
       Navigator.pop(context);
-    }else if(option == MenuOptions.ChangeCamera){
-      _changeCamera();
-    }
-  }
-
-  Future _changeCamera() async {
-    if(cameraDirection == cameraDirectionBack){
-      setState(() {
-        cameraDirection = cameraDirectionFront;
-      });
-    }else{
-      setState(() {
-        cameraDirection = cameraDirectionBack;
-      });
     }
   }
 
@@ -118,7 +97,7 @@ class _LiveOcrState extends State<LiveOcr> {
                   detector: textRecognizer.processImage,
                   onResult: _readText,
                   resolution: resolutionPreset,
-                  cameraLensDirection: cameraDirection,
+                  cameraLensDirection: CameraLensDirection.back,
                   onDispose: () {
                     textRecognizer.close();
                     },
@@ -131,22 +110,16 @@ class _LiveOcrState extends State<LiveOcr> {
             ),
           )
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _changeCamera,
-        child: Icon(Icons.camera),
-      ),
     );
   }
 }
 
 class MenuOptions{
-  static const String ChangeCamera = 'ChangeCamera';
   static const String RenderResults = 'Render Results';
   static const String Copy = 'Copy';
   static const String GoBack = 'Go Back';
 
   static const List<String> choices = <String>[
-    ChangeCamera,
     RenderResults,
     Copy,
     GoBack
