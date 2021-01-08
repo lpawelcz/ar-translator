@@ -128,13 +128,22 @@ class _ImageOcrState extends State<ImageOcr> {
                     ],
                   ),
                 )),
-      floatingActionButton: Visibility(
-        child: FloatingActionButton(
-          onPressed: _selectImage,
-          child: Icon(Icons.add_outlined),
+      floatingActionButton:
+          Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+        Visibility(
+          child: FloatingActionButton(
+            onPressed: _selectImage,
+            child: Icon(Icons.add_outlined),
+            heroTag: null,
+          ),
+          visible: selectedImage == null,
         ),
-        visible: selectedImage == null,
-      ),
+        FloatingActionButton(
+          child: Icon(Icons.camera_alt_outlined),
+          onPressed: () => print("Screenshot"),
+          heroTag: null,
+        )
+      ]),
     );
   }
 }
