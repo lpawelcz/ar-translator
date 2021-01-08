@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'detector_painters.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 
 class ImageOcr extends StatefulWidget {
   @override
@@ -17,7 +19,10 @@ class _ImageOcrState extends State<ImageOcr> {
   List<dynamic> translateTextResult;
   Size selectedImageSize;
   bool renderResults = true;
-  bool isTextInTranslator = false;
+
+  File _imageFile;
+  //instance of ScreenshotController
+  ScreenshotController screenshotController = ScreenshotController();
 
   Future _selectImage() async {
     var tempStore = await ImagePicker().getImage(source: ImageSource.gallery);
@@ -51,18 +56,13 @@ class _ImageOcrState extends State<ImageOcr> {
     String destLang = "pl";
     TextTranslator translator = new TextTranslator();
 
-    setState(() {
-      isTextInTranslator = true;
-    });
+    await translator.init("apikey.json",
+        "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/");
+    destText = await translator.translateAll(readTextResult, destLang);
 
     await translator.init("apikey.json",
         "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/");
     destText = await translator.translateAll(readText, destLang);
-
-    setState(() {
-      translateTextResult = destText;
-    });
-  }
 
   Widget _resultsRenderer() {
     const Text noResultsText = Text('No results!');
@@ -70,17 +70,6 @@ class _ImageOcrState extends State<ImageOcr> {
       print(noResultsText);
       return Center(
         child: noResultsText,
-      );
-    }
-    if (translateTextResult == null) {
-      return CustomPaint(
-        painter: TextDetectorPainter(
-            selectedImageSize, readTextResult, isTextInTranslator),
-      );
-    } else {
-      return CustomPaint(
-        painter: TextDetectorPainter.formTextDetectorPainter(selectedImageSize,
-            readTextResult, isTextInTranslator, translateTextResult),
       );
     }
   }

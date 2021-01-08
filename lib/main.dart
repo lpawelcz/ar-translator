@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:ar_translator/ocr/image_ocr.dart';
 import 'package:ar_translator/ocr/live_ocr.dart';
 import 'package:firebase_core/firebase_core.dart';
