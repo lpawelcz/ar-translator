@@ -145,6 +145,7 @@ class _ImageOcrState extends State<ImageOcr> {
           ),
           visible: selectedImage == null,
         ),
+        SizedBox(height: 7),
         FloatingActionButton(
           child: Icon(Icons.camera_alt_outlined),
           onPressed: () => print("Screenshot"),
