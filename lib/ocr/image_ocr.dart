@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:ar_translator/translation/text-transl.dart';
 import 'package:flutter/material.dart';
 import 'detector_painters.dart';
@@ -7,6 +6,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:album_saver/album_saver.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 
 class ImageOcr extends StatefulWidget {
   @override
@@ -19,6 +21,7 @@ class _ImageOcrState extends State<ImageOcr> {
   Size selectedImageSize;
   bool renderResults = true;
 
+  //Screenshoting
   File _imageFile;
   //instance of ScreenshotController
   ScreenshotController screenshotController = ScreenshotController();
@@ -97,6 +100,48 @@ class _ImageOcrState extends State<ImageOcr> {
     }
   }
 
+  void _takePhoto() async {
+    ImagePicker.pickImage(source: ImageSource.camera)
+        .then((File recordedImage) {
+      if (recordedImage != null && recordedImage.path != null) {
+        setState(() {
+          print("saving in progress...");
+        });
+        GallerySaver.saveImage(recordedImage.path).then((path) {
+          setState(() {
+            print("image saved");
+          });
+        });
+      }
+    });
+  }
+
+  void _takeScreenshot() async {
+    _imageFile = null;
+    screenshotController
+        .capture(delay: Duration(milliseconds: 20))
+        .then((File image) async {
+      print("Capture Done");
+      setState(() {
+        _imageFile = image;
+      });
+      //ten plugin wydaje sie nie dzialac
+      //final result = await ImageGallerySaver.saveImage(_imageFile.readAsBytesSync());
+      //wywalilo apke...
+      //AlbumSaver.createAlbum(albumName: "AR-Trans");
+      if (_imageFile != null && _imageFile.path != null) {
+        GallerySaver.saveImage(_imageFile.path).then((path) {
+          setState(() {
+            print("image saved");
+          });
+        });
+        print("Saved to gallery");
+      }
+    }).catchError((onError) {
+      print("#@#brak zaznaczonych granic obrazu");
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,6 +161,8 @@ class _ImageOcrState extends State<ImageOcr> {
         ],
       ),
       body: Center(
+        child: Screenshot(
+          controller: screenshotController,
           child: selectedImage == null
               ? Text('No image selected.')
               : Container(
@@ -134,24 +181,31 @@ class _ImageOcrState extends State<ImageOcr> {
                       ),
                     ],
                   ),
-                )),
-      floatingActionButton:
-          Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-        Visibility(
-          child: FloatingActionButton(
-            onPressed: _selectImage,
-            child: Icon(Icons.add_outlined),
-            heroTag: null,
-          ),
-          visible: selectedImage == null,
+                ),
         ),
-        SizedBox(height: 7),
-        FloatingActionButton(
-          child: Icon(Icons.camera_alt_outlined),
-          onPressed: () => print("Screenshot"),
-          heroTag: null,
-        )
-      ]),
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Visibility(
+            child: FloatingActionButton(
+              onPressed: _selectImage,
+              child: Icon(Icons.add_outlined),
+              heroTag: null,
+            ),
+            visible: selectedImage == null,
+          ),
+          SizedBox(height: 7),
+          FloatingActionButton(
+            onPressed: () {
+              //_takePhoto();
+              _takeScreenshot();
+            },
+            child: Icon(Icons.camera_alt_outlined),
+            heroTag: null,
+          )
+        ],
+      ),
     );
   }
 }
