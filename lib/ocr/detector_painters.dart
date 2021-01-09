@@ -84,6 +84,13 @@ class TextDetectorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(TextDetectorPainter oldDelegate) {
+    if (visionText == null || visionText.text.isEmpty) {
+      return false;
+    }
+    if (oldDelegate.visionText.text == null ||
+        oldDelegate.visionText.text.isEmpty) {
+      return true;
+    }
     TextBlock tb = visionText.blocks[0];
     TextLine tl = tb.lines[0];
     TextBlock tb2 = oldDelegate.visionText.blocks[0];
