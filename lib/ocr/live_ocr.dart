@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_camera_ml_vision/flutter_camera_ml_vision.dart';
-
 import 'detector_painters.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 
 class LiveOcr extends StatefulWidget {
   @override
@@ -22,11 +24,15 @@ class _LiveOcrState extends State<LiveOcr> {
 
   TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
 
+  //Screenshoting
+  File _imageFile;
+  //instance of ScreenshotController
+  ScreenshotController screenshotController = ScreenshotController();
+
   @override
   void initState() {
     super.initState();
   }
-
 
   Future _readText(VisionText text) async {
     Size imageSize = Size(
@@ -40,15 +46,14 @@ class _LiveOcrState extends State<LiveOcr> {
     });
   }
 
-
   Future _onMenuAction(String option) async {
-    if(option == MenuOptions.Copy){
+    if (option == MenuOptions.Copy) {
       print('Copy');
-    }else if(option == MenuOptions.RenderResults){
+    } else if (option == MenuOptions.RenderResults) {
       setState(() {
         renderResults = !renderResults;
       });
-    }else if(option == MenuOptions.GoBack){
+    } else if (option == MenuOptions.GoBack) {
       Navigator.pop(context);
     }
   }
@@ -57,7 +62,9 @@ class _LiveOcrState extends State<LiveOcr> {
     const Text noResultsText = Text('No results!');
     if (readTextResult == null) {
       print(noResultsText);
-      return Center(child: noResultsText,);
+      return Center(
+        child: noResultsText,
+      );
     }
 
     print("RESULTSSSSS COUNT: " + readTextResult.blocks.length.toString());
@@ -65,6 +72,32 @@ class _LiveOcrState extends State<LiveOcr> {
     return CustomPaint(
       painter: TextDetectorPainter(cameraSize, readTextResult),
     );
+  }
+
+  void _takeScreenshot() async {
+    _imageFile = null;
+    screenshotController
+        .capture(delay: Duration(milliseconds: 20))
+        .then((File image) async {
+      //print("Capture Done");
+      setState(() {
+        _imageFile = image;
+      });
+      //ten plugin wydaje sie nie dzialac
+      //final result = await ImageGallerySaver.saveImage(_imageFile.readAsBytesSync());
+      //wywalilo apke...
+      //AlbumSaver.createAlbum(albumName: "AR-Trans");
+      if (_imageFile != null && _imageFile.path != null) {
+        GallerySaver.saveImage(_imageFile.path).then((path) {
+          setState(() {
+            //print("image saved");
+          });
+        });
+        //print("Saved to gallery");
+      }
+    }).catchError((onError) {
+      //print("#@#brak zaznaczonych granic obrazu");
+    });
   }
 
   @override
@@ -75,21 +108,22 @@ class _LiveOcrState extends State<LiveOcr> {
         actions: <Widget>[
           PopupMenuButton<String>(
               onSelected: _onMenuAction,
-              itemBuilder: (BuildContext context){
-                return MenuOptions.choices.map((String choice){
+              itemBuilder: (BuildContext context) {
+                return MenuOptions.choices.map((String choice) {
                   return PopupMenuItem<String>(
                     value: choice,
                     child: Text(choice),
                   );
                 }).toList();
-              }
-          )
+              })
         ],
       ),
       body: Center(
+        child: Screenshot(
+          controller: screenshotController,
           child: Container(
-              color: Colors.black,
-              child: Stack(
+            color: Colors.black,
+            child: Stack(
               fit: StackFit.expand,
               children: <Widget>[
                 CameraMlVision<VisionText>(
@@ -100,7 +134,7 @@ class _LiveOcrState extends State<LiveOcr> {
                   cameraLensDirection: CameraLensDirection.back,
                   onDispose: () {
                     textRecognizer.close();
-                    },
+                  },
                 ),
                 Visibility(
                   visible: renderResults,
@@ -108,20 +142,36 @@ class _LiveOcrState extends State<LiveOcr> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: null,
+            child: Icon(Icons.add_outlined),
+            heroTag: null,
+          ),
+          SizedBox(height: 7),
+          FloatingActionButton(
+            onPressed: () {
+              //_takePhoto();
+              _takeScreenshot();
+            },
+            child: Icon(Icons.camera_alt_outlined),
+            heroTag: null,
           )
+        ],
       ),
     );
   }
 }
 
-class MenuOptions{
+class MenuOptions {
   static const String RenderResults = 'Render Results';
   static const String Copy = 'Copy';
   static const String GoBack = 'Go Back';
 
-  static const List<String> choices = <String>[
-    RenderResults,
-    Copy,
-    GoBack
-  ];
+  static const List<String> choices = <String>[RenderResults, Copy, GoBack];
 }

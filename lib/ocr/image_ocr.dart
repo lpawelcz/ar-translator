@@ -5,9 +5,6 @@ import 'detector_painters.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:album_saver/album_saver.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 
 class ImageOcr extends StatefulWidget {
@@ -100,6 +97,7 @@ class _ImageOcrState extends State<ImageOcr> {
     }
   }
 
+  /*
   void _takePhoto() async {
     ImagePicker.pickImage(source: ImageSource.camera)
         .then((File recordedImage) {
@@ -115,13 +113,14 @@ class _ImageOcrState extends State<ImageOcr> {
       }
     });
   }
+  */
 
   void _takeScreenshot() async {
     _imageFile = null;
     screenshotController
         .capture(delay: Duration(milliseconds: 20))
         .then((File image) async {
-      print("Capture Done");
+      //print("Capture Done");
       setState(() {
         _imageFile = image;
       });
@@ -132,13 +131,13 @@ class _ImageOcrState extends State<ImageOcr> {
       if (_imageFile != null && _imageFile.path != null) {
         GallerySaver.saveImage(_imageFile.path).then((path) {
           setState(() {
-            print("image saved");
+            //print("image saved");
           });
         });
-        print("Saved to gallery");
+        //print("Saved to gallery");
       }
     }).catchError((onError) {
-      print("#@#brak zaznaczonych granic obrazu");
+      //print("#@#brak zaznaczonych granic obrazu");
     });
   }
 
