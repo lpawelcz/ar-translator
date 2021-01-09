@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:gallery_saver/gallery_saver.dart';
+import 'package:native_screenshot/native_screenshot.dart';
 
 class ImageOcr extends StatefulWidget {
   @override
@@ -109,6 +110,8 @@ class _ImageOcrState extends State<ImageOcr> {
   */
 
   void _takeScreenshot() async {
+    String imgPath = await NativeScreenshot.takeScreenshot();
+    /*
     _imageFile = null;
     screenshotController
         .capture(delay: Duration(milliseconds: 20))
@@ -132,6 +135,7 @@ class _ImageOcrState extends State<ImageOcr> {
     }).catchError((onError) {
       //print("#@#brak zaznaczonych granic obrazu");
     });
+    */
   }
 
   @override
