@@ -5,14 +5,16 @@ import 'package:flutter/material.dart';
 
 // Paints rectangles around all the text in the image.
 class TextDetectorPainter extends CustomPainter {
-  TextDetectorPainter(this.absoluteImageSize, this.visionText);
+  TextDetectorPainter(
+      this.absoluteImageSize, this.visionText, this.isTextInTranslator);
 
-  TextDetectorPainter.formTextDetectorPainter(
-      this.absoluteImageSize, this.visionText, this.translatedText);
+  TextDetectorPainter.formTextDetectorPainter(this.absoluteImageSize,
+      this.visionText, this.isTextInTranslator, this.translatedText);
 
   final Size absoluteImageSize;
   final VisionText visionText;
   List<dynamic> translatedText;
+  final bool isTextInTranslator;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -47,7 +49,7 @@ class TextDetectorPainter extends CustomPainter {
         var charAm = line.text.length;
         var fonS = (len / charAm + 5).toDouble();
 
-        if (translatedText != null) {
+        if (translatedText != null && translatedText.isNotEmpty) {
           charAm = line.text.length.toInt();
           translatedTextLine = translatedText[i].toString();
         }
@@ -82,8 +84,37 @@ class TextDetectorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(TextDetectorPainter oldDelegate) {
-    return oldDelegate.absoluteImageSize != absoluteImageSize ||
-        oldDelegate.visionText != visionText ||
-        oldDelegate.translatedText != translatedText;
+    TextBlock tb = visionText.blocks[0];
+    TextLine tl = tb.lines[0];
+    TextBlock tb2 = oldDelegate.visionText.blocks[0];
+    TextLine tl2 = tb2.lines[0];
+
+    if (translatedText != null) {
+      bool warunek = translatedText.isEmpty;
+      if (!warunek) {
+        if (tl.boundingBox.left > tl2.boundingBox.left + 72 ||
+            tl.boundingBox.left < tl2.boundingBox.left - 72) {
+          return true;
+        } else {
+          return oldDelegate.translatedText != translatedText;
+        }
+      } else {
+        if (tl.boundingBox.left > tl2.boundingBox.left + 72 ||
+            tl.boundingBox.left < tl2.boundingBox.left - 72) {
+          return true;
+        } else {
+          return false;
+        }
+        return false;
+      }
+    } else {
+      if (tl.boundingBox.left > tl2.boundingBox.left + 72 ||
+          tl.boundingBox.left < tl2.boundingBox.left - 72) {
+        return true;
+      } else {
+        return false;
+      }
+      return false;
+    }
   }
 }

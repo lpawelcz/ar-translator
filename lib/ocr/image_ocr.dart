@@ -17,6 +17,7 @@ class _ImageOcrState extends State<ImageOcr> {
   List<dynamic> translateTextResult;
   Size selectedImageSize;
   bool renderResults = true;
+  bool isTextInTranslator = false;
 
   Future _selectImage() async {
     var tempStore = await ImagePicker().getImage(source: ImageSource.gallery);
@@ -50,16 +51,13 @@ class _ImageOcrState extends State<ImageOcr> {
     String destLang = "pl";
     TextTranslator translator = new TextTranslator();
 
+    setState(() {
+      isTextInTranslator = true;
+    });
+
     await translator.init("apikey.json",
         "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/");
     destText = await translator.translateAll(readText, destLang);
-
-    // int i = 0;
-    // print("Translated text blocks:");
-    // for (String textBlock in destText) {
-    //   print("$i. $textBlock");
-    //   i++;
-    // }
 
     setState(() {
       translateTextResult = destText;
@@ -76,12 +74,13 @@ class _ImageOcrState extends State<ImageOcr> {
     }
     if (translateTextResult == null) {
       return CustomPaint(
-        painter: TextDetectorPainter(selectedImageSize, readTextResult),
+        painter: TextDetectorPainter(
+            selectedImageSize, readTextResult, isTextInTranslator),
       );
     } else {
       return CustomPaint(
-        painter: TextDetectorPainter.formTextDetectorPainter(
-            selectedImageSize, readTextResult, translateTextResult),
+        painter: TextDetectorPainter.formTextDetectorPainter(selectedImageSize,
+            readTextResult, isTextInTranslator, translateTextResult),
       );
     }
   }

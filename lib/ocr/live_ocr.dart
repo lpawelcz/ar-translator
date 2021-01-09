@@ -107,12 +107,25 @@ class _LiveOcrState extends State<LiveOcr> {
 
     if (translatedText == null) {
       return CustomPaint(
-        painter: TextDetectorPainter(cameraSize, readTextResult),
+        painter:
+            TextDetectorPainter(cameraSize, readTextResult, isTextInTranslator),
       );
+    } else if (!isTextInTranslator) {
+      if (translatedText.isNotEmpty) {
+        return CustomPaint(
+          painter: TextDetectorPainter.formTextDetectorPainter(
+              cameraSize, readTextResult, isTextInTranslator, translatedText),
+        );
+      } else {
+        return CustomPaint(
+          painter: TextDetectorPainter(
+              cameraSize, readTextResult, isTextInTranslator),
+        );
+      }
     } else {
       return CustomPaint(
-        painter: TextDetectorPainter.formTextDetectorPainter(
-            cameraSize, readTextResult, translatedText),
+        painter:
+            TextDetectorPainter(cameraSize, readTextResult, isTextInTranslator),
       );
     }
   }
