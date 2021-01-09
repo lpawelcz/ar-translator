@@ -1,10 +1,11 @@
+import 'dart:io';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_camera_ml_vision/flutter_camera_ml_vision.dart';
-import 'package:ar_translator/translation/text-transl.dart';
-
 import 'detector_painters.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 
 class LiveOcr extends StatefulWidget {
   @override
@@ -24,6 +25,11 @@ class _LiveOcrState extends State<LiveOcr> {
   ResolutionPreset resolutionPreset = ResolutionPreset.high;
 
   TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
+
+  //Screenshoting
+  File _imageFile;
+  //instance of ScreenshotController
+  ScreenshotController screenshotController = ScreenshotController();
 
   @override
   void initState() {
@@ -73,15 +79,6 @@ class _LiveOcrState extends State<LiveOcr> {
         },
       );
 
-      setState(() {
-        translatedText = destText;
-        isTextInTranslator = false;
-        readTextResult = text;
-        cameraSize = imageSize;
-      });
-    }
-  }
-
   Future _onMenuAction(String option) async {
     if (option == MenuOptions.Copy) {
       print('Copy');
@@ -130,6 +127,32 @@ class _LiveOcrState extends State<LiveOcr> {
     }
   }
 
+  void _takeScreenshot() async {
+    _imageFile = null;
+    screenshotController
+        .capture(delay: Duration(milliseconds: 20))
+        .then((File image) async {
+      //print("Capture Done");
+      setState(() {
+        _imageFile = image;
+      });
+      //ten plugin wydaje sie nie dzialac
+      //final result = await ImageGallerySaver.saveImage(_imageFile.readAsBytesSync());
+      //wywalilo apke...
+      //AlbumSaver.createAlbum(albumName: "AR-Trans");
+      if (_imageFile != null && _imageFile.path != null) {
+        GallerySaver.saveImage(_imageFile.path).then((path) {
+          setState(() {
+            //print("image saved");
+          });
+        });
+        //print("Saved to gallery");
+      }
+    }).catchError((onError) {
+      //print("#@#brak zaznaczonych granic obrazu");
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,28 +172,51 @@ class _LiveOcrState extends State<LiveOcr> {
         ],
       ),
       body: Center(
+        child: Screenshot(
+          controller: screenshotController,
           child: Container(
-        color: Colors.black,
-        child: Stack(
-          fit: StackFit.expand,
-          children: <Widget>[
-            CameraMlVision<VisionText>(
-              key: _scanKey,
-              detector: textRecognizer.processImage,
-              onResult: _readText,
-              resolution: resolutionPreset,
-              cameraLensDirection: CameraLensDirection.back,
-              onDispose: () {
-                textRecognizer.close();
-              },
+            color: Colors.black,
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                CameraMlVision<VisionText>(
+                  key: _scanKey,
+                  detector: textRecognizer.processImage,
+                  onResult: _readText,
+                  resolution: resolutionPreset,
+                  cameraLensDirection: CameraLensDirection.back,
+                  onDispose: () {
+                    textRecognizer.close();
+                  },
+                ),
+                Visibility(
+                  visible: renderResults,
+                  child: _resultsRenderer(),
+                ),
+              ],
             ),
-            Visibility(
-              visible: renderResults,
-              child: _resultsRenderer(),
-            ),
-          ],
+          ),
         ),
-      )),
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: null,
+            child: Icon(Icons.add_outlined),
+            heroTag: null,
+          ),
+          SizedBox(height: 7),
+          FloatingActionButton(
+            onPressed: () {
+              //_takePhoto();
+              _takeScreenshot();
+            },
+            child: Icon(Icons.camera_alt_outlined),
+            heroTag: null,
+          )
+        ],
+      ),
     );
   }
 }

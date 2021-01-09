@@ -36,9 +36,6 @@ dependencies:
   flutter_camera_ml_vision: ^2.3.0
   flutter_ibm_watson: ^0.0.4
   screenshot: ^0.2.0
-  image_gallery_saver: ^1.6.7
-  path_provider: ^1.6.14
-  album_saver: ^0.0.2
   gallery_saver: ^2.0.1
 
 
