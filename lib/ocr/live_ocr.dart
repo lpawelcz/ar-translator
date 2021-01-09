@@ -19,6 +19,7 @@ class _LiveOcrState extends State<LiveOcr> {
   VisionText readTextResult;
   Size cameraSize;
   List<dynamic> translatedText;
+  bool isTextInTranslator = false;
 
   ResolutionPreset resolutionPreset = ResolutionPreset.high;
 
@@ -35,29 +36,50 @@ class _LiveOcrState extends State<LiveOcr> {
       _scanKey.currentState.cameraValue.previewSize.width,
     );
 
-    setState(() {
-      readTextResult = text;
-      cameraSize = imageSize;
-    });
+    readTextResult = text;
+    cameraSize = imageSize;
 
     var destText = [];
     String destLang = "pl";
-    TextTranslator translator = new TextTranslator();
 
-    await translator.init("apikey.json",
-        "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/");
-    destText = await translator.translateAll(text, destLang);
+    if (!isTextInTranslator) {
+      TextTranslator translator = new TextTranslator();
 
-    // int i = 0;
-    // print("Translated text blocks:");
-    // for (String textBlock in destText) {
-    //   print("$i. $textBlock");
-    //   i++;
-    // }
+      isTextInTranslator = true;
 
-    setState(() {
-      translatedText = destText;
-    });
+      CameraMlVision<VisionText>(
+        key: _scanKey,
+        detector: textRecognizer.processImage,
+        onResult: null,
+        resolution: resolutionPreset,
+        cameraLensDirection: CameraLensDirection.back,
+        onDispose: () {
+          textRecognizer.close();
+        },
+      );
+
+      await translator.init("apikey.json",
+          "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/");
+      destText = await translator.translateAll(text, destLang);
+
+      CameraMlVision<VisionText>(
+        key: _scanKey,
+        detector: textRecognizer.processImage,
+        onResult: _readText,
+        resolution: resolutionPreset,
+        cameraLensDirection: CameraLensDirection.back,
+        onDispose: () {
+          textRecognizer.close();
+        },
+      );
+
+      setState(() {
+        translatedText = destText;
+        isTextInTranslator = false;
+        readTextResult = text;
+        cameraSize = imageSize;
+      });
+    }
   }
 
   Future _onMenuAction(String option) async {
@@ -73,7 +95,7 @@ class _LiveOcrState extends State<LiveOcr> {
   }
 
   Widget _resultsRenderer() {
-    const Text noResultsText = Text('No results!');
+    const Text noResultsText = Text('Loading...');
     if (readTextResult == null) {
       print(noResultsText);
       return Center(
