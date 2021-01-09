@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'detector_painters.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
-import 'package:screenshot/screenshot.dart';
-import 'package:gallery_saver/gallery_saver.dart';
 import 'package:native_screenshot/native_screenshot.dart';
 
 class ImageOcr extends StatefulWidget {
@@ -18,11 +16,6 @@ class _ImageOcrState extends State<ImageOcr> {
   VisionText readTextResult;
   Size selectedImageSize;
   bool renderResults = true;
-
-  //Screenshoting
-  File _imageFile;
-  //instance of ScreenshotController
-  ScreenshotController screenshotController = ScreenshotController();
 
   Future _selectImage() async {
     var tempStore = await ImagePicker().getImage(source: ImageSource.gallery);
@@ -98,51 +91,8 @@ class _ImageOcrState extends State<ImageOcr> {
     }
   }
 
-  /*
-  void _takePhoto() async {
-    ImagePicker.pickImage(source: ImageSource.camera)
-        .then((File recordedImage) {
-      if (recordedImage != null && recordedImage.path != null) {
-        setState(() {
-          print("saving in progress...");
-        });
-        GallerySaver.saveImage(recordedImage.path).then((path) {
-          setState(() {
-            print("image saved");
-          });
-        });
-      }
-    });
-  }
-  */
-
   void _takeScreenshot() async {
     String imgPath = await NativeScreenshot.takeScreenshot();
-    /*
-    _imageFile = null;
-    screenshotController
-        .capture(delay: Duration(milliseconds: 20))
-        .then((File image) async {
-      //print("Capture Done");
-      setState(() {
-        _imageFile = image;
-      });
-      //ten plugin wydaje sie nie dzialac
-      //final result = await ImageGallerySaver.saveImage(_imageFile.readAsBytesSync());
-      //wywalilo apke...
-      //AlbumSaver.createAlbum(albumName: "AR-Trans");
-      if (_imageFile != null && _imageFile.path != null) {
-        GallerySaver.saveImage(_imageFile.path).then((path) {
-          setState(() {
-            //print("image saved");
-          });
-        });
-        //print("Saved to gallery");
-      }
-    }).catchError((onError) {
-      //print("#@#brak zaznaczonych granic obrazu");
-    });
-    */
   }
 
   @override
@@ -164,28 +114,25 @@ class _ImageOcrState extends State<ImageOcr> {
         ],
       ),
       body: Center(
-        child: Screenshot(
-          controller: screenshotController,
-          child: selectedImage == null
-              ? Text('No image selected.')
-              : Container(
-                  width: 720,
-                  height: 1280,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: <Widget>[
-                      Image.file(
-                        File(selectedImage.path),
-                        fit: BoxFit.fill,
-                      ), // Bez Box Fit Fill kwadraty nie działają
-                      Visibility(
-                        visible: renderResults,
-                        child: _resultsRenderer(),
-                      ),
-                    ],
-                  ),
+        child: selectedImage == null
+            ? Text('No image selected.')
+            : Container(
+                width: 720,
+                height: 1280,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    Image.file(
+                      File(selectedImage.path),
+                      fit: BoxFit.fill,
+                    ), // Bez Box Fit Fill kwadraty nie działają
+                    Visibility(
+                      visible: renderResults,
+                      child: _resultsRenderer(),
+                    ),
+                  ],
                 ),
-        ),
+              ),
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -200,11 +147,16 @@ class _ImageOcrState extends State<ImageOcr> {
           ),
           SizedBox(height: 7),
           FloatingActionButton(
+            onPressed: () => print("save to clipboard"),
+            child: Icon(Icons.save_outlined),
+            heroTag: null,
+          ),
+          SizedBox(height: 7),
+          FloatingActionButton(
             onPressed: () {
-              //_takePhoto();
               _takeScreenshot();
             },
-            child: Icon(Icons.camera_alt_outlined),
+            child: Icon(Icons.add_a_photo_outlined),
             heroTag: null,
           )
         ],

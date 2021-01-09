@@ -1,11 +1,8 @@
-import 'dart:io';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_camera_ml_vision/flutter_camera_ml_vision.dart';
 import 'detector_painters.dart';
-import 'package:screenshot/screenshot.dart';
-import 'package:gallery_saver/gallery_saver.dart';
 import 'package:native_screenshot/native_screenshot.dart';
 
 class LiveOcr extends StatefulWidget {
@@ -24,11 +21,6 @@ class _LiveOcrState extends State<LiveOcr> {
   ResolutionPreset resolutionPreset = ResolutionPreset.high;
 
   TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
-
-  //Screenshoting
-  File _imageFile;
-  //instance of ScreenshotController
-  ScreenshotController screenshotController = ScreenshotController();
 
   @override
   void initState() {
@@ -77,30 +69,6 @@ class _LiveOcrState extends State<LiveOcr> {
 
   void _takeScreenshot() async {
     String imgPath = await NativeScreenshot.takeScreenshot();
-    /*_imageFile = null;
-    screenshotController
-        .capture(delay: Duration(milliseconds: 20))
-        .then((File image) async {
-      //print("Capture Done");
-      setState(() {
-        _imageFile = image;
-      });
-      //ten plugin wydaje sie nie dzialac
-      //final result = await ImageGallerySaver.saveImage(_imageFile.readAsBytesSync());
-      //wywalilo apke...
-      //AlbumSaver.createAlbum(albumName: "AR-Trans");
-      if (_imageFile != null && _imageFile.path != null) {
-        GallerySaver.saveImage(_imageFile.path).then((path) {
-          setState(() {
-            //print("image saved");
-          });
-        });
-        //print("Saved to gallery");
-      }
-    }).catchError((onError) {
-      //print("#@#brak zaznaczonych granic obrazu");
-    });
-    */
   }
 
   @override
@@ -122,29 +90,26 @@ class _LiveOcrState extends State<LiveOcr> {
         ],
       ),
       body: Center(
-        child: Screenshot(
-          controller: screenshotController,
-          child: Container(
-            color: Colors.black,
-            child: Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                CameraMlVision<VisionText>(
-                  key: _scanKey,
-                  detector: textRecognizer.processImage,
-                  onResult: _readText,
-                  resolution: resolutionPreset,
-                  cameraLensDirection: CameraLensDirection.back,
-                  onDispose: () {
-                    textRecognizer.close();
-                  },
-                ),
-                Visibility(
-                  visible: renderResults,
-                  child: _resultsRenderer(),
-                ),
-              ],
-            ),
+        child: Container(
+          color: Colors.black,
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              CameraMlVision<VisionText>(
+                key: _scanKey,
+                detector: textRecognizer.processImage,
+                onResult: _readText,
+                resolution: resolutionPreset,
+                cameraLensDirection: CameraLensDirection.back,
+                onDispose: () {
+                  textRecognizer.close();
+                },
+              ),
+              Visibility(
+                visible: renderResults,
+                child: _resultsRenderer(),
+              ),
+            ],
           ),
         ),
       ),
@@ -152,17 +117,16 @@ class _LiveOcrState extends State<LiveOcr> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: null,
-            child: Icon(Icons.add_outlined),
+            onPressed: () => print("save to clipboard"),
+            child: Icon(Icons.save_outlined),
             heroTag: null,
           ),
           SizedBox(height: 7),
           FloatingActionButton(
             onPressed: () {
-              //_takePhoto();
               _takeScreenshot();
             },
-            child: Icon(Icons.camera_alt_outlined),
+            child: Icon(Icons.add_a_photo_outlined),
             heroTag: null,
           )
         ],
