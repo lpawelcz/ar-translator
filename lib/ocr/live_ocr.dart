@@ -6,6 +6,7 @@ import 'package:flutter_camera_ml_vision/flutter_camera_ml_vision.dart';
 import 'detector_painters.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:gallery_saver/gallery_saver.dart';
+import 'package:native_screenshot/native_screenshot.dart';
 
 class LiveOcr extends StatefulWidget {
   @override
@@ -75,7 +76,8 @@ class _LiveOcrState extends State<LiveOcr> {
   }
 
   void _takeScreenshot() async {
-    _imageFile = null;
+    String imgPath = await NativeScreenshot.takeScreenshot();
+    /*_imageFile = null;
     screenshotController
         .capture(delay: Duration(milliseconds: 20))
         .then((File image) async {
@@ -98,6 +100,7 @@ class _LiveOcrState extends State<LiveOcr> {
     }).catchError((onError) {
       //print("#@#brak zaznaczonych granic obrazu");
     });
+    */
   }
 
   @override

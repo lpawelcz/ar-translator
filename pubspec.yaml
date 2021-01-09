@@ -37,6 +37,7 @@ dependencies:
   flutter_ibm_watson: ^0.0.4
   screenshot: ^0.2.0
   gallery_saver: ^2.0.1
+  native_screenshot: ^0.0.5
 
 
 dev_dependencies:
