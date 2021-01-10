@@ -2,6 +2,7 @@ import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_camera_ml_vision/flutter_camera_ml_vision.dart';
+import 'package:ar_translator/translation/text-transl.dart';
 
 import 'detector_painters.dart';
 
@@ -17,6 +18,8 @@ class _LiveOcrState extends State<LiveOcr> {
 
   VisionText readTextResult;
   Size cameraSize;
+  List<dynamic> translatedText;
+  bool isTextInTranslator = false;
 
   ResolutionPreset resolutionPreset = ResolutionPreset.high;
 
@@ -27,44 +30,104 @@ class _LiveOcrState extends State<LiveOcr> {
     super.initState();
   }
 
-
   Future _readText(VisionText text) async {
     Size imageSize = Size(
       _scanKey.currentState.cameraValue.previewSize.height,
       _scanKey.currentState.cameraValue.previewSize.width,
     );
 
-    setState(() {
-      readTextResult = text;
-      cameraSize = imageSize;
-    });
+    readTextResult = text;
+    cameraSize = imageSize;
+
+    var destText = [];
+    String destLang = "pl";
+
+    if (!isTextInTranslator) {
+      TextTranslator translator = new TextTranslator();
+
+      isTextInTranslator = true;
+
+      CameraMlVision<VisionText>(
+        key: _scanKey,
+        detector: textRecognizer.processImage,
+        onResult: null,
+        resolution: resolutionPreset,
+        cameraLensDirection: CameraLensDirection.back,
+        onDispose: () {
+          textRecognizer.close();
+        },
+      );
+
+      await translator.init("apikey.json",
+          "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/");
+      destText = await translator.translateAll(text, destLang);
+
+      CameraMlVision<VisionText>(
+        key: _scanKey,
+        detector: textRecognizer.processImage,
+        onResult: _readText,
+        resolution: resolutionPreset,
+        cameraLensDirection: CameraLensDirection.back,
+        onDispose: () {
+          textRecognizer.close();
+        },
+      );
+
+      setState(() {
+        translatedText = destText;
+        isTextInTranslator = false;
+        readTextResult = text;
+        cameraSize = imageSize;
+      });
+    }
   }
 
-
   Future _onMenuAction(String option) async {
-    if(option == MenuOptions.Copy){
+    if (option == MenuOptions.Copy) {
       print('Copy');
-    }else if(option == MenuOptions.RenderResults){
+    } else if (option == MenuOptions.RenderResults) {
       setState(() {
         renderResults = !renderResults;
       });
-    }else if(option == MenuOptions.GoBack){
+    } else if (option == MenuOptions.GoBack) {
       Navigator.pop(context);
     }
   }
 
   Widget _resultsRenderer() {
-    const Text noResultsText = Text('No results!');
+    const Text noResultsText = Text('Loading...');
     if (readTextResult == null) {
       print(noResultsText);
-      return Center(child: noResultsText,);
+      return Center(
+        child: noResultsText,
+      );
     }
 
     print("RESULTSSSSS COUNT: " + readTextResult.blocks.length.toString());
 
-    return CustomPaint(
-      painter: TextDetectorPainter(cameraSize, readTextResult),
-    );
+    if (translatedText == null) {
+      return CustomPaint(
+        painter:
+            TextDetectorPainter(cameraSize, readTextResult, isTextInTranslator),
+      );
+    } else if (!isTextInTranslator) {
+      if (translatedText.isNotEmpty) {
+        return CustomPaint(
+          painter: TextDetectorPainter.formTextDetectorPainter(
+              cameraSize, readTextResult, isTextInTranslator, translatedText),
+        );
+      } else {
+        return CustomPaint(
+          painter: TextDetectorPainter(
+              cameraSize, readTextResult, isTextInTranslator),
+        );
+      }
+    } else {
+      return CustomPaint(
+        painter:
+            TextDetectorPainter(cameraSize, readTextResult, isTextInTranslator),
+      );
+    }
   }
 
   @override
@@ -75,53 +138,47 @@ class _LiveOcrState extends State<LiveOcr> {
         actions: <Widget>[
           PopupMenuButton<String>(
               onSelected: _onMenuAction,
-              itemBuilder: (BuildContext context){
-                return MenuOptions.choices.map((String choice){
+              itemBuilder: (BuildContext context) {
+                return MenuOptions.choices.map((String choice) {
                   return PopupMenuItem<String>(
                     value: choice,
                     child: Text(choice),
                   );
                 }).toList();
-              }
-          )
+              })
         ],
       ),
       body: Center(
           child: Container(
-              color: Colors.black,
-              child: Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                CameraMlVision<VisionText>(
-                  key: _scanKey,
-                  detector: textRecognizer.processImage,
-                  onResult: _readText,
-                  resolution: resolutionPreset,
-                  cameraLensDirection: CameraLensDirection.back,
-                  onDispose: () {
-                    textRecognizer.close();
-                    },
-                ),
-                Visibility(
-                  visible: renderResults,
-                  child: _resultsRenderer(),
-                ),
-              ],
+        color: Colors.black,
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            CameraMlVision<VisionText>(
+              key: _scanKey,
+              detector: textRecognizer.processImage,
+              onResult: _readText,
+              resolution: resolutionPreset,
+              cameraLensDirection: CameraLensDirection.back,
+              onDispose: () {
+                textRecognizer.close();
+              },
             ),
-          )
-      ),
+            Visibility(
+              visible: renderResults,
+              child: _resultsRenderer(),
+            ),
+          ],
+        ),
+      )),
     );
   }
 }
 
-class MenuOptions{
+class MenuOptions {
   static const String RenderResults = 'Render Results';
   static const String Copy = 'Copy';
   static const String GoBack = 'Go Back';
 
-  static const List<String> choices = <String>[
-    RenderResults,
-    Copy,
-    GoBack
-  ];
+  static const List<String> choices = <String>[RenderResults, Copy, GoBack];
 }
