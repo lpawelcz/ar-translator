@@ -15,6 +15,7 @@ class ImageOcr extends StatefulWidget {
 class _ImageOcrState extends State<ImageOcr> {
   PickedFile selectedImage;
   VisionText readTextResult;
+  List<dynamic> translatedText;
   Size selectedImageSize;
   bool renderResults = true;
 
@@ -42,18 +43,13 @@ class _ImageOcrState extends State<ImageOcr> {
         Size(decodedImage.width.toDouble(), decodedImage.height.toDouble());
     print(imageSize);
 
-    setState(() {
-      readTextResult = readText;
-      selectedImageSize = imageSize;
-    });
-
     var destText = [];
     String destLang = "pl";
     TextTranslator translator = new TextTranslator();
 
     await translator.init("apikey.json",
         "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/");
-    destText = await translator.translateAll(readTextResult, destLang);
+    destText = await translator.translateAll(readText, destLang);
 
     int i = 0;
     print("Translated text blocks:");
@@ -61,6 +57,12 @@ class _ImageOcrState extends State<ImageOcr> {
       print("$i. $textBlock");
       i++;
     }
+
+    setState(() {
+      readTextResult = readText;
+      selectedImageSize = imageSize;
+      translatedText = destText;
+    });
   }
 
   Widget _resultsRenderer() {
@@ -97,7 +99,13 @@ class _ImageOcrState extends State<ImageOcr> {
   }
 
   void _copyClipboard(BuildContext context) {
-    FlutterClipboard.copy("your text to copy").then((result) {
+    String wholeTranslatedText = "";
+
+    for (String textBlock in translatedText) {
+      wholeTranslatedText += textBlock + " ";
+    }
+
+    FlutterClipboard.copy(wholeTranslatedText).then((result) {
       final snackBar = SnackBar(
         content: Text('Copied to Clipboard'),
       );
