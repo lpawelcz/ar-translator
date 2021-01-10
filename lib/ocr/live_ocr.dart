@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_camera_ml_vision/flutter_camera_ml_vision.dart';
 import 'package:ar_translator/translation/text-transl.dart';
-
 import 'detector_painters.dart';
+import 'package:native_screenshot/native_screenshot.dart';
 
 class LiveOcr extends StatefulWidget {
   @override
@@ -82,6 +82,7 @@ class _LiveOcrState extends State<LiveOcr> {
     }
   }
 
+
   Future _onMenuAction(String option) async {
     if (option == MenuOptions.Copy) {
       print('Copy');
@@ -130,6 +131,10 @@ class _LiveOcrState extends State<LiveOcr> {
     }
   }
 
+  void _takeScreenshot() async {
+    String imgPath = await NativeScreenshot.takeScreenshot();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -167,10 +172,29 @@ class _LiveOcrState extends State<LiveOcr> {
             Visibility(
               visible: renderResults,
               child: _resultsRenderer(),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
-      )),
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () => print("save to clipboard"),
+            child: Icon(Icons.save_outlined),
+            heroTag: null,
+          ),
+          SizedBox(height: 7),
+          FloatingActionButton(
+            onPressed: () {
+              _takeScreenshot();
+            },
+            child: Icon(Icons.add_a_photo_outlined),
+            heroTag: null,
+          )
+        ],
+      ),
     );
   }
 }

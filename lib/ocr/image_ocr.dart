@@ -1,10 +1,11 @@
 import 'dart:io';
-
 import 'package:ar_translator/translation/text-transl.dart';
 import 'package:flutter/material.dart';
 import 'detector_painters.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:native_screenshot/native_screenshot.dart';
+import 'package:clipboard/clipboard.dart';
 
 class ImageOcr extends StatefulWidget {
   @override
@@ -14,7 +15,7 @@ class ImageOcr extends StatefulWidget {
 class _ImageOcrState extends State<ImageOcr> {
   PickedFile selectedImage;
   VisionText readTextResult;
-  List<dynamic> translateTextResult;
+  List<dynamic> translatedText;
   Size selectedImageSize;
   bool renderResults = true;
   bool isTextInTranslator = false;
@@ -42,25 +43,28 @@ class _ImageOcrState extends State<ImageOcr> {
     Size imageSize =
         Size(decodedImage.width.toDouble(), decodedImage.height.toDouble());
     print(imageSize);
-    setState(() {
-      readTextResult = readText;
-      selectedImageSize = imageSize;
-    });
+
 
     var destText = [];
     String destLang = "pl";
     TextTranslator translator = new TextTranslator();
 
-    setState(() {
-      isTextInTranslator = true;
-    });
-
     await translator.init("apikey.json",
         "https://api.eu-gb.language-translator.watson.cloud.ibm.com/instances/c6b84156-6dd7-43cc-823d-719270063d12/");
     destText = await translator.translateAll(readText, destLang);
 
+    int i = 0;
+    print("Translated text blocks:");
+    for (String textBlock in destText) {
+      print("$i. $textBlock");
+      i++;
+    }
+
     setState(() {
-      translateTextResult = destText;
+      readTextResult = readText;
+      selectedImageSize = imageSize;
+      translatedText = destText;
+      isTextInTranslator = true;
     });
   }
 
@@ -72,7 +76,7 @@ class _ImageOcrState extends State<ImageOcr> {
         child: noResultsText,
       );
     }
-    if (translateTextResult == null) {
+    if (translatedText == null) {
       return CustomPaint(
         painter: TextDetectorPainter(
             selectedImageSize, readTextResult, isTextInTranslator),
@@ -80,7 +84,7 @@ class _ImageOcrState extends State<ImageOcr> {
     } else {
       return CustomPaint(
         painter: TextDetectorPainter.formTextDetectorPainter(selectedImageSize,
-            readTextResult, isTextInTranslator, translateTextResult),
+            readTextResult, isTextInTranslator, translatedText),
       );
     }
   }
@@ -99,6 +103,25 @@ class _ImageOcrState extends State<ImageOcr> {
     } else if (option == MenuOptions.SelectImage) {
       _selectImage();
     }
+  }
+
+  void _takeScreenshot() async {
+    String imgPath = await NativeScreenshot.takeScreenshot();
+  }
+
+  void _copyClipboard(BuildContext context) {
+    String wholeTranslatedText = "";
+
+    for (String textBlock in translatedText) {
+      wholeTranslatedText += textBlock + " ";
+    }
+
+    FlutterClipboard.copy(wholeTranslatedText).then((result) {
+      final snackBar = SnackBar(
+        content: Text('Copied to Clipboard'),
+      );
+      Scaffold.of(context).showSnackBar(snackBar);
+    });
   }
 
   @override
@@ -120,6 +143,7 @@ class _ImageOcrState extends State<ImageOcr> {
         ],
       ),
       body: Center(
+
           child: selectedImage == null
               ? Text('No image selected.')
               : Container(
@@ -138,13 +162,42 @@ class _ImageOcrState extends State<ImageOcr> {
                       ),
                     ],
                   ),
-                )),
-      floatingActionButton: Visibility(
-        child: FloatingActionButton(
-          onPressed: _selectImage,
-          child: Icon(Icons.add_outlined),
-        ),
-        visible: selectedImage == null,
+              ),
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Visibility(
+            child: FloatingActionButton(
+              onPressed: _selectImage,
+              child: Icon(Icons.add_outlined),
+              heroTag: null,
+            ),
+            visible: selectedImage == null,
+          ),
+          SizedBox(height: 7),
+          Builder(
+          builder: (context) {
+             return Column(
+                children: <Widget>[
+                FloatingActionButton(
+                  child: Icon(Icons.save_outlined),
+                  heroTag: null,
+                  onPressed: () => _copyClipboard(context),
+                ),
+                ],
+              );
+          },
+          ),
+          SizedBox(height: 7),
+          FloatingActionButton(
+            onPressed: () {
+              _takeScreenshot();
+            },
+            child: Icon(Icons.add_a_photo_outlined),
+            heroTag: null,
+          )
+        ],
       ),
     );
   }
