@@ -131,18 +131,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     fontSize: 20,
                   )),
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Clipboard()));
-              },
-              child: Text("Clipboard"),
-              style: ElevatedButton.styleFrom(
-                  minimumSize: Size(250, 35),
-                  textStyle: TextStyle(
-                    fontSize: 20,
-                  )),
-            )
           ],
         ),
       ),
@@ -161,24 +149,5 @@ class PhotoTranslate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ImageOcr();
-  }
-}
-
-class Clipboard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Clipboard"),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          child: Text("zawracamy"),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-    );
   }
 }
