@@ -92,8 +92,6 @@ class _ImageOcrState extends State<ImageOcr> {
   Future _onMenuAction(String option) async {
     if (option == MenuOptions.ReReadText) {
       _readText();
-    } else if (option == MenuOptions.Copy) {
-      print('Copy');
     } else if (option == MenuOptions.RenderResults) {
       setState(() {
         renderResults = !renderResults;
@@ -207,14 +205,12 @@ class MenuOptions {
   static const String SelectImage = 'Select Image';
   static const String ReReadText = 'ReRead Text';
   static const String RenderResults = 'Render Results';
-  static const String Copy = 'Copy';
   static const String GoBack = 'Go Back';
 
   static const List<String> choices = <String>[
     SelectImage,
     ReReadText,
     RenderResults,
-    Copy,
     GoBack
   ];
 }

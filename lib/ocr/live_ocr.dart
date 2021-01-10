@@ -85,9 +85,7 @@ class _LiveOcrState extends State<LiveOcr> {
 
 
   Future _onMenuAction(String option) async {
-    if (option == MenuOptions.Copy) {
-      print('Copy');
-    } else if (option == MenuOptions.RenderResults) {
+    if (option == MenuOptions.RenderResults) {
       setState(() {
         renderResults = !renderResults;
       });
@@ -225,8 +223,7 @@ class _LiveOcrState extends State<LiveOcr> {
 
 class MenuOptions {
   static const String RenderResults = 'Render Results';
-  static const String Copy = 'Copy';
   static const String GoBack = 'Go Back';
 
-  static const List<String> choices = <String>[RenderResults, Copy, GoBack];
+  static const List<String> choices = <String>[RenderResults, GoBack];
 }
