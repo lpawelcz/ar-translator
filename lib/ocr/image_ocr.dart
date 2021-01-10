@@ -18,6 +18,7 @@ class _ImageOcrState extends State<ImageOcr> {
   List<dynamic> translatedText;
   Size selectedImageSize;
   bool renderResults = true;
+  bool isTextInTranslator = false;
 
   Future _selectImage() async {
     var tempStore = await ImagePicker().getImage(source: ImageSource.gallery);
@@ -43,6 +44,7 @@ class _ImageOcrState extends State<ImageOcr> {
         Size(decodedImage.width.toDouble(), decodedImage.height.toDouble());
     print(imageSize);
 
+
     var destText = [];
     String destLang = "pl";
     TextTranslator translator = new TextTranslator();
@@ -62,6 +64,7 @@ class _ImageOcrState extends State<ImageOcr> {
       readTextResult = readText;
       selectedImageSize = imageSize;
       translatedText = destText;
+      isTextInTranslator = true;
     });
   }
 
@@ -73,9 +76,17 @@ class _ImageOcrState extends State<ImageOcr> {
         child: noResultsText,
       );
     }
-    return CustomPaint(
-      painter: TextDetectorPainter(selectedImageSize, readTextResult),
-    );
+    if (translatedText == null) {
+      return CustomPaint(
+        painter: TextDetectorPainter(
+            selectedImageSize, readTextResult, isTextInTranslator),
+      );
+    } else {
+      return CustomPaint(
+        painter: TextDetectorPainter.formTextDetectorPainter(selectedImageSize,
+            readTextResult, isTextInTranslator, translatedText),
+      );
+    }
   }
 
   Future _onMenuAction(String option) async {
@@ -132,24 +143,25 @@ class _ImageOcrState extends State<ImageOcr> {
         ],
       ),
       body: Center(
-        child: selectedImage == null
-            ? Text('No image selected.')
-            : Container(
-                width: 720,
-                height: 1280,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: <Widget>[
-                    Image.file(
-                      File(selectedImage.path),
-                      fit: BoxFit.fill,
-                    ), // Bez Box Fit Fill kwadraty nie działają
-                    Visibility(
-                      visible: renderResults,
-                      child: _resultsRenderer(),
-                    ),
-                  ],
-                ),
+
+          child: selectedImage == null
+              ? Text('No image selected.')
+              : Container(
+                  width: 720,
+                  height: 1280,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: <Widget>[
+                      Image.file(
+                        File(selectedImage.path),
+                        fit: BoxFit.fill,
+                      ), // Bez Box Fit Fill kwadraty nie działają
+                      Visibility(
+                        visible: renderResults,
+                        child: _resultsRenderer(),
+                      ),
+                    ],
+                  ),
               ),
       ),
       floatingActionButton: Column(

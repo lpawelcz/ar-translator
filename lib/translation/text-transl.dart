@@ -13,8 +13,10 @@ class TextTranslator {
   Future init(apiKeyPath, url) async {
     this.apiKey = await getAPIKey(apiKeyPath);
     this.url = url;
-    this.watsonOptions = await IamOptions(iamApiKey: apiKey, url: this.url).build();
-    this.watsonTranslator = new LanguageTranslator(iamOptions: this.watsonOptions);
+    this.watsonOptions =
+        await IamOptions(iamApiKey: apiKey, url: this.url).build();
+    this.watsonTranslator =
+        new LanguageTranslator(iamOptions: this.watsonOptions);
   }
 
   Future<String> getJson(apiKeyJsonPath) {
@@ -47,20 +49,44 @@ class TextTranslator {
 
     srcTextBlock = processTextBlock(textBlock);
     srcLang = await watsonTranslator.identifylanguage(srcTextBlock);
-    destTextBlock = await watsonTranslator.translate(srcTextBlock, srcLang.toString(), destLang);
+    destTextBlock = await watsonTranslator.translate(
+        srcTextBlock, srcLang.toString(), destLang);
 
     return destTextBlock.toString();
   }
 
-  Future translateAll(VisionText srcText, String destLang) async {
-    var destText = [];
+  Future<String> translateTextLine(String textLine, String destLang) async {
+    String srcTextBlock;
+    IdentifyLanguageResult srcLang;
+    TranslationResult destTextBlock;
 
-    for (TextBlock block in srcText.blocks) {
-      String destTextBlock;
-      destTextBlock = await translateTextBlock(block.text, destLang);
-      destText.add(destTextBlock);
+    srcTextBlock = processTextBlock(textLine);
+    srcLang = await watsonTranslator.identifylanguage(srcTextBlock);
+    destTextBlock = await watsonTranslator.translate(
+        srcTextBlock, srcLang.toString(), destLang);
+
+    if (destTextBlock.translations == null ||
+        destTextBlock.translations[0]['translation'] == "null") {
+      return textLine;
+    } else {
+      return destTextBlock.translations[0]['translation'];
     }
-    return destText;
   }
 
+  Future translateAll(VisionText srcText, String destLang) async {
+    var destText = [];
+    var destText2 = [];
+
+    for (TextBlock block in srcText.blocks) {
+      String destTextBlock2 = await translateTextLine(block.text, destLang);
+      destText2.add(destTextBlock2);
+      for (TextLine line in block.lines) {
+        String destTextBlock;
+        destTextBlock = await translateTextLine(line.text, destLang);
+        destText.add(destTextBlock);
+      }
+    }
+
+    return destText;
+  }
 }
