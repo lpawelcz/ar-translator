@@ -5,6 +5,7 @@ import 'detector_painters.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:native_screenshot/native_screenshot.dart';
+import 'package:clipboard/clipboard.dart';
 
 class ImageOcr extends StatefulWidget {
   @override
@@ -95,6 +96,15 @@ class _ImageOcrState extends State<ImageOcr> {
     String imgPath = await NativeScreenshot.takeScreenshot();
   }
 
+  void _copyClipboard(BuildContext context) {
+    FlutterClipboard.copy("your text to copy").then((result) {
+      final snackBar = SnackBar(
+        content: Text('Copied to Clipboard'),
+      );
+      Scaffold.of(context).showSnackBar(snackBar);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,10 +156,18 @@ class _ImageOcrState extends State<ImageOcr> {
             visible: selectedImage == null,
           ),
           SizedBox(height: 7),
-          FloatingActionButton(
-            onPressed: () => print("save to clipboard"),
-            child: Icon(Icons.save_outlined),
-            heroTag: null,
+          Builder(
+          builder: (context) {
+             return Column(
+                children: <Widget>[
+                FloatingActionButton(
+                  child: Icon(Icons.save_outlined),
+                  heroTag: null,
+                  onPressed: () => _copyClipboard(context),
+                ),
+                ],
+              );
+          },
           ),
           SizedBox(height: 7),
           FloatingActionButton(
