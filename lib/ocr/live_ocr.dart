@@ -2,6 +2,7 @@ import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_camera_ml_vision/flutter_camera_ml_vision.dart';
+import 'package:ar_translator/translation/text-transl.dart';
 import 'detector_painters.dart';
 import 'package:native_screenshot/native_screenshot.dart';
 
@@ -71,6 +72,16 @@ class _LiveOcrState extends State<LiveOcr> {
           textRecognizer.close();
         },
       );
+
+      setState(() {
+        translatedText = destText;
+        isTextInTranslator = false;
+        readTextResult = text;
+        cameraSize = imageSize;
+      });
+    }
+  }
+
 
   Future _onMenuAction(String option) async {
     if (option == MenuOptions.Copy) {
@@ -143,24 +154,24 @@ class _LiveOcrState extends State<LiveOcr> {
         ],
       ),
       body: Center(
-        child: Container(
-          color: Colors.black,
-          child: Stack(
-            fit: StackFit.expand,
-            children: <Widget>[
-              CameraMlVision<VisionText>(
-                key: _scanKey,
-                detector: textRecognizer.processImage,
-                onResult: _readText,
-                resolution: resolutionPreset,
-                cameraLensDirection: CameraLensDirection.back,
-                onDispose: () {
-                  textRecognizer.close();
-                },
-              ),
-              Visibility(
-                visible: renderResults,
-                child: _resultsRenderer(),
+          child: Container(
+        color: Colors.black,
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            CameraMlVision<VisionText>(
+              key: _scanKey,
+              detector: textRecognizer.processImage,
+              onResult: _readText,
+              resolution: resolutionPreset,
+              cameraLensDirection: CameraLensDirection.back,
+              onDispose: () {
+                textRecognizer.close();
+              },
+            ),
+            Visibility(
+              visible: renderResults,
+              child: _resultsRenderer(),
               ),
             ],
           ),
