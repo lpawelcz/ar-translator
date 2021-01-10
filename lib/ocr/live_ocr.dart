@@ -5,6 +5,7 @@ import 'package:flutter_camera_ml_vision/flutter_camera_ml_vision.dart';
 import 'package:ar_translator/translation/text-transl.dart';
 import 'detector_painters.dart';
 import 'package:native_screenshot/native_screenshot.dart';
+import 'package:clipboard/clipboard.dart';
 
 class LiveOcr extends StatefulWidget {
   @override
@@ -84,9 +85,7 @@ class _LiveOcrState extends State<LiveOcr> {
 
 
   Future _onMenuAction(String option) async {
-    if (option == MenuOptions.Copy) {
-      print('Copy');
-    } else if (option == MenuOptions.RenderResults) {
+    if (option == MenuOptions.RenderResults) {
       setState(() {
         renderResults = !renderResults;
       });
@@ -135,6 +134,21 @@ class _LiveOcrState extends State<LiveOcr> {
     String imgPath = await NativeScreenshot.takeScreenshot();
   }
 
+  void _copyClipboard(BuildContext context) {
+    String wholeTranslatedText = "";
+
+    for (String textBlock in translatedText) {
+      wholeTranslatedText += textBlock + " ";
+    }
+
+    FlutterClipboard.copy(wholeTranslatedText).then((result) {
+      final snackBar = SnackBar(
+        content: Text('Copied to Clipboard'),
+      );
+      Scaffold.of(context).showSnackBar(snackBar);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -180,10 +194,18 @@ class _LiveOcrState extends State<LiveOcr> {
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          FloatingActionButton(
-            onPressed: () => print("save to clipboard"),
-            child: Icon(Icons.save_outlined),
-            heroTag: null,
+          Builder(
+            builder: (context) {
+              return Column(
+                children: <Widget>[
+                  FloatingActionButton(
+                    child: Icon(Icons.save_outlined),
+                    heroTag: null,
+                    onPressed: () => _copyClipboard(context),
+                  ),
+                ],
+              );
+            },
           ),
           SizedBox(height: 7),
           FloatingActionButton(
@@ -201,8 +223,7 @@ class _LiveOcrState extends State<LiveOcr> {
 
 class MenuOptions {
   static const String RenderResults = 'Render Results';
-  static const String Copy = 'Copy';
   static const String GoBack = 'Go Back';
 
-  static const List<String> choices = <String>[RenderResults, Copy, GoBack];
+  static const List<String> choices = <String>[RenderResults, GoBack];
 }
